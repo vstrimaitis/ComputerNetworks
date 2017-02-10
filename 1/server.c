@@ -110,12 +110,11 @@ int getEmptySlotIndex(pthread_t* slots){
 
 int main(int argc, char *argv[]){
     unsigned int port;
-    int l_socket; // socket'as skirtas prisijungim� laukimui
-    int c_socket; // prisijungusio kliento socket'as
+    int l_socket;
+    int c_socket;
 
-    struct sockaddr_in servaddr; // Serverio adreso strukt�ra
-    struct sockaddr_in clientaddr; // Prisijungusio kliento adreso strukt�ra
-//    int clientaddrlen;
+    struct sockaddr_in servaddr;
+    struct sockaddr_in clientaddr;
     socklen_t clientaddrlen;
 
     int s_len;
@@ -138,54 +137,31 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
-    /*
-     * Sukuriamas serverio socket'as
-     */
     if ((l_socket = socket(AF_INET, SOCK_STREAM,0))< 0){
         fprintf(stderr,"ERROR #2: cannot create listening socket.\n");
         exit(1);
     }
     
-    /*
-     * I�valoma ir u�pildoma serverio adreso strukt�ra
-     */
     memset(&servaddr,0, sizeof(servaddr));
-    servaddr.sin_family = AF_INET; // nurodomas protokolas (IP)
+    servaddr.sin_family = AF_INET;
 
-    /*
-     * Nurodomas IP adresas, kuriuo bus laukiama klient�, �iuo atveju visi 
-     * esami sistemos IP adresai (visi interfeis'ai)
-     */
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
-    servaddr.sin_port = htons(port); // nurodomas portas
+    servaddr.sin_port = htons(port);
     
-    /*
-     * Serverio adresas susiejamas su socket'u
-     */
     if (bind (l_socket, (struct sockaddr *)&servaddr,sizeof(servaddr))<0){
         fprintf(stderr,"ERROR #3: bind listening socket.\n");
         exit(1);
     }
 
-    /*
-     * Nurodoma, kad socket'u l_socket bus laukiama klient� prisijungimo,
-     * eil�je ne daugiau kaip 5 aptarnavimo laukiantys klientai
-     */
     if (listen(l_socket, 5) <0){
         fprintf(stderr,"ERROR #4: error in listen().\n");
         exit(1);
     }
 
-    for(;;){
-        /*
-         * I�valomas buferis ir kliento adreso strukt�ra
-         */
+    while(1){
         memset(&clientaddr,0, sizeof(clientaddr));
         memset(&buffer,0,sizeof(buffer));
 
-        /*
-         * Laukiama klient� prisijungim�
-         */
         clientaddrlen = sizeof(struct sockaddr);
         if ((c_socket = accept(l_socket,
             (struct sockaddr*)&clientaddr,&clientaddrlen))<0){

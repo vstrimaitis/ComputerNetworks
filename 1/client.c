@@ -38,7 +38,7 @@ void playGame(int socket){
 int main(int argc, char *argv[]){
     unsigned int port;
     int s_socket;
-    struct sockaddr_in servaddr; // Serverio adreso struktûra
+    struct sockaddr_in servaddr;
 
     char buffer[BUFFLEN];
 
@@ -54,34 +54,20 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
-    /*
-     * Sukuriamas socket'as
-     */
     if ((s_socket = socket(AF_INET, SOCK_STREAM,0))< 0){
         fprintf(stderr,"ERROR #2: cannot create socket.\n");
         exit(1);
     }
-                                
-   /*
-    * Iðvaloma ir uþpildoma serverio struktûra
-    */
+
     memset(&servaddr,0,sizeof(servaddr));
-    servaddr.sin_family = AF_INET; // nurodomas protokolas (IP)
-    servaddr.sin_port = htons(port); // nurodomas portas
-    
-    /*
-     * Iðverèiamas simboliø eilutëje uþraðytas ip á skaitinæ formà ir
-     * nustatomas serverio adreso struktûroje.
-     */  
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(port);
+
     if ( inet_aton(argv[1], &servaddr.sin_addr) <= 0 ) {
         fprintf(stderr,"ERROR #3: Invalid remote IP address.\n");
         exit(1);
     }       
 
-    
-    /* 
-     * Prisijungiama prie serverio
-     */
     if (connect(s_socket,(struct sockaddr*)&servaddr,sizeof(servaddr))<0){
         fprintf(stderr,"ERROR #4: error in connect().\n");
         exit(1);
