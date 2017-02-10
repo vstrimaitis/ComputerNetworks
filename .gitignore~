@@ -31,7 +31,3 @@
 # Debug files
 *.dSYM/
 *.su
-
-# Samples and test folders
-samples/
-*test*
