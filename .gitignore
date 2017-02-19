@@ -35,3 +35,6 @@
 # Samples and test folders
 samples/
 *test*
+
+# Visual Studio code folder
+.vscode

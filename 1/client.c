@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "helpers.h"
+
 #define BUFFLEN 1024
 
 void playGame(int socket){
@@ -35,12 +37,32 @@ void playGame(int socket){
     }
 }
 
+int establishConnection(Peer *p, char* ip, unsigned int port){
+    if ((port < 1) || (port > 65535))
+        return 1;
+
+    // Step 1: socket()
+    if ((p->socket = socket(AF_INET, SOCK_STREAM,0))< 0)
+        return 2;
+
+    memset(&(p->address),0,sizeof(p->address));
+    // Set the protocol and port in the server address structure
+    p->address.sin_family = AF_INET;
+    p->address.sin_port = htons(port);
+    
+    // Convert char* ip into a numerical form and save it in the server address structure
+    if ( inet_aton(ip, &p->address.sin_addr) <= 0 )
+        return 3;
+    
+    // Step 2: connect()
+    if (connect(p->socket,(struct sockaddr*)&(p->address),sizeof(p->address))<0)
+        return 4;
+    return 0;
+}
+
 int main(int argc, char *argv[]){
     unsigned int port;
-    int s_socket;
-    struct sockaddr_in servaddr;
-
-    char buffer[BUFFLEN];
+    Peer server;
 
     if (argc != 3){
         fprintf(stdout,"USAGE: %s <ip> <port>\n",argv[0]);
@@ -49,31 +71,25 @@ int main(int argc, char *argv[]){
 
     port = atoi(argv[2]);
 
-    if ((port < 1) || (port > 65535)){
-        fprintf(stderr, "ERROR #1: invalid port specified.\n");
-        exit(1);
-    }
-
-    if ((s_socket = socket(AF_INET, SOCK_STREAM,0))< 0){
-        fprintf(stderr,"ERROR #2: cannot create socket.\n");
-        exit(1);
-    }
-
-    memset(&servaddr,0,sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(port);
-
-    if ( inet_aton(argv[1], &servaddr.sin_addr) <= 0 ) {
-        fprintf(stderr,"ERROR #3: Invalid remote IP address.\n");
-        exit(1);
-    }       
-
-    if (connect(s_socket,(struct sockaddr*)&servaddr,sizeof(servaddr))<0){
-        fprintf(stderr,"ERROR #4: error in connect().\n");
-        exit(1);
+    int connectionResult = establishConnection(&server, argv[1], port);
+    if(connectionResult != 0){
+        switch(connectionResult){
+            case 1:
+                fprintf(stderr, "Invalid port specified.\n");
+                break;
+            case 2:
+                fprintf(stderr,"Cannot create socket.\n");
+                break;
+            case 3:
+                fprintf(stderr,"Invalid remote IP address.\n");
+                break;
+            case 4:
+                fprintf(stderr,"An error occurred while establishing the connection.\n");
+                break;
+        }
     }
   
-    playGame(s_socket);
-    close(s_socket);
+    playGame(server.socket);
+    close(server.socket);
     return 0;
 }
