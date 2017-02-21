@@ -1,6 +1,7 @@
 typedef enum { false, true } bool;
 
 typedef enum {
+    None,
     Correct,
     Less,
     More,

@@ -22,7 +22,8 @@ Client clients[MAX_CLIENTS];
 Answer getInput(Client c){
     char buffer[BUFF_LEN];
     memset(&buffer, 0, sizeof(buffer));
-    recv(c.peer.socket,buffer,sizeof(buffer),0);
+    if(recv(c.peer.socket,buffer,sizeof(buffer),0) <= 0)
+        return None;
     fprintf(stdout, "IP: %s\tReceived: '%s'\n",ip(c), buffer);
     int i = 0;
     for(; i < strlen(buffer); i++)
@@ -47,8 +48,12 @@ void playGame(Client client){
         "I'll keep guessing and you'll have to answer, whether\n",
         "your number is larger or smaller than the one I'm guessing.\n",
         "==============================================================\n");
-    send(client.peer.socket, buffer, strlen(buffer), 0);
-    getInput(client);
+    if(send(client.peer.socket, buffer, strlen(buffer), 0) <= 0){
+        fprintf(stdout, "IP: %s\tDisconnected\n", ip(client));
+        return;
+    }
+    if(getInput(client) == None)
+        return;
     while(1){
         if(hi < lo){
             sprintf(buffer, "You lied to me!\n");
@@ -59,7 +64,10 @@ void playGame(Client client){
         memset(&buffer, 0, sizeof(buffer));
         sprintf(buffer, "%d) Is your number %d? (Yes/Less/More) ", guesses, mid);
         fprintf(stdout, "IP: %s\tGuessing: %d\n", ip(client), mid);
-        send(client.peer.socket,buffer,strlen(buffer),0);
+        if(send(client.peer.socket,buffer,strlen(buffer),0) <= 0){
+            fprintf(stdout, "IP: %s\tDisconnected\n", ip(client));
+            return;
+        }
         while(1){
             Answer ans = getInput(client);
             if(ans == Correct){
@@ -73,9 +81,14 @@ void playGame(Client client){
             } else if(ans == More){
                 lo = mid+1;
                 break;
+            } else if(ans == None){
+                return;
             } else{
                 sprintf(buffer, "Invalid choice!\n");
-                send(client.peer.socket,buffer,strlen(buffer),0);
+                if(send(client.peer.socket,buffer,strlen(buffer),0) <= 0){
+                    fprintf(stdout, "IP: %s\tDisconnected\n", ip(client));
+                    return;
+                }
             }
         }
         guesses++;
@@ -180,8 +193,6 @@ int main(int argc, char *argv[]){
                 pthread_create(&clients[index].thread, NULL, runNewGameInstance, (void*)&clients[index]);
             }
         }
-        
     }
-
     return 0;
 }

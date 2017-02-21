@@ -14,26 +14,38 @@
 void playGame(int socket){
     char buffer[BUFFLEN];
     memset(&buffer, 0, sizeof(buffer));
-    recv(socket, buffer, BUFFLEN, 0);
+    if(recv(socket, buffer, BUFFLEN, 0) <= 0){
+        fprintf(stdout, "Something went wrong while trying to receive the server's response.");
+        return;
+    }
     fprintf(stdout, "%s\n", buffer);
     fprintf(stdout, "Enter any character to begin: ");
     char c = getchar();
-    send(socket, "start", 6, 0);
+    if(send(socket, "start", 6, 0) <= 0){
+        fprintf(stdout, "Something went wrong while trying to send a message to the server.");
+        return;
+    }
     while(1){
         memset(&buffer, 0, sizeof(buffer));
-        recv(socket,buffer,BUFFLEN,0);
-        if(strlen(buffer) == 0)
-            break;
+        if(recv(socket,buffer,BUFFLEN,0) <= 0){
+            fprintf(stdout, "Something went wrong while trying to receive the server's response.");
+            return;
+        }
         fprintf(stdout, "%s", buffer);
 
-        send(socket, "ping", 5, 0);
-        int ping = recv(socket, buffer, BUFFLEN, 0);
-        if(ping == 0)
+        if(send(socket, "ping", 5, 0) <= 0){
+            fprintf(stdout, "Something went wrong while trying to send a message to the server.");
+            return;
+        }
+        if(recv(socket, buffer, BUFFLEN, 0) <= 0) // the game is finished
             return;
 
         memset(&buffer, 0, sizeof(buffer));
         scanf("%s", buffer);
-        send(socket,buffer,strlen(buffer),0);
+        if(send(socket,buffer,strlen(buffer),0) <= 0){
+            fprintf(stdout, "Something went wrong while trying to send a message to the server.");
+            return;
+        }
     }
 }
 
