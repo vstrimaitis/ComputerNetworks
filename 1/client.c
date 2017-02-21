@@ -19,8 +19,9 @@ void playGame(int socket){
         return;
     }
     fprintf(stdout, "%s\n", buffer);
-    fprintf(stdout, "Enter any character to begin: ");
-    char c = getchar();
+    fprintf(stdout, "Press `ENTER` to begin: ");
+    char c;
+    while((c = getchar()) != '\n');
     if(send(socket, "start", 6, 0) <= 0){
         fprintf(stdout, "Something went wrong while trying to send a message to the server.");
         return;
