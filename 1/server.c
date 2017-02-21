@@ -82,6 +82,7 @@ void playGame(Client client){
                 lo = mid+1;
                 break;
             } else if(ans == None){
+                fprintf(stdout, "IP: %s\tDisconnected\n", ip(client));
                 return;
             } else{
                 sprintf(buffer, "Invalid choice!\n");
@@ -176,6 +177,8 @@ int main(int argc, char *argv[]){
         }
         return 1;
     }
+    
+    fprintf(stdout, "Server started. Waiting for connections...\n");
 
     while(1){
         if(acceptConnection(&client, listener) != 0){
