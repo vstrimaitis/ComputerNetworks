@@ -4,9 +4,12 @@
 #include <arpa/inet.h>
 
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
+#include <pthread.h>
 #include "helpers.h"
 #define BUFF_LEN 1024
 #define MAX_CLIENTS 10
@@ -103,6 +106,7 @@ void* runNewGameInstance(void *client){
     close(c.peer.socket);
     c.isRunning = false;
     pthread_exit(0);
+    return NULL;
 }
 
 int getEmptySlotIndex(){
