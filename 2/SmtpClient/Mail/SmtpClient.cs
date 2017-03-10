@@ -9,6 +9,8 @@ namespace Mail
 {
     /*
      * Return codes: http://www.greenend.org.uk/rjk/tech/smtpreplies.html#TURN
+     * http://www.serversmtp.com/en/smtp-error
+     * Status codes: https://www.usps.org/info/smtp_status.html
      */
     public class SmtpClient : IDisposable
     {
