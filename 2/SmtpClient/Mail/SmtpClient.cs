@@ -11,6 +11,7 @@ namespace Mail
      * Return codes: http://www.greenend.org.uk/rjk/tech/smtpreplies.html#TURN
      * http://www.serversmtp.com/en/smtp-error
      * Status codes: https://www.usps.org/info/smtp_status.html
+     * More status codes: https://www.iana.org/assignments/smtp-enhanced-status-codes/smtp-enhanced-status-codes.xml
      */
     public class SmtpClient : IDisposable
     {
@@ -33,9 +34,9 @@ namespace Mail
             set
             {
                 _credentials = value;
-                Debug.WriteLine(SendCommand("AUTH LOGIN"));
-                Debug.WriteLine(SendCommand(_credentials.Login));
-                Debug.WriteLine(SendCommand(_credentials.Password));
+                Debug.WriteLine(SendCommandWithResponse("AUTH LOGIN"));
+                Debug.WriteLine(SendCommandWithResponse(_credentials.Login));
+                Debug.WriteLine(SendCommandWithResponse(_credentials.Password));
             }
         }
 
@@ -48,30 +49,48 @@ namespace Mail
             _stream.AuthenticateAsClient(host);
             _reader = new StreamReader(_stream);
             _writer = new StreamWriter(_stream);
-            _writer.NewLine = "\r\n";
 
             _responseManager = new ResponseManager(_reader);
-
-            var response = _responseManager.GetResponse();
-            Debug.WriteLine(response);
-            Debug.WriteLine(SendCommand(string.Format("{0} {1}", SmtpCommands.HelloExtended, Dns.GetHostName())));
             
+            Debug.WriteLine(_responseManager.GetResponse());
+            Debug.WriteLine(SendCommandWithResponse(string.Format("{0} {1}", SmtpCommands.HelloExtended, Dns.GetHostName())));
         }
 
-        private Response SendCommand(string command)
+        public void Send(MailMessage message)
         {
-            _writer.WriteLine(command);
-            _writer.Flush();
-            return _responseManager.GetResponse();
+            Debug.WriteLine(SendCommandWithResponse(string.Format("{0} <{1}>", SmtpCommands.MailFrom, message.From.Address)));
+            foreach(var r in message.To)
+            {
+                Debug.WriteLine(SendCommandWithResponse(string.Format("{0} <{1}>", SmtpCommands.Recipient, r.Address)));
+            }
+            Debug.WriteLine(SendCommandWithResponse(SmtpCommands.MailData));
+            foreach(var l in message.ToMimeString())
+            {
+                SendCommand(l);
+            }
+
+            Debug.WriteLine(_responseManager.GetResponse());
         }
 
         public void Dispose()
         {
-            Debug.WriteLine(SendCommand(SmtpCommands.Quit));
+            Debug.WriteLine(SendCommandWithResponse(SmtpCommands.Quit));
             _reader.Dispose();
             _writer.Dispose();
             _stream.Dispose();
             _client.Close();
+        }
+
+        private void SendCommand(string command)
+        {
+            _writer.WriteLine(command);
+            _writer.Flush();
+        }
+
+        private Response SendCommandWithResponse(string command)
+        {
+            SendCommand(command);
+            return _responseManager.GetResponse();
         }
     }
 }
