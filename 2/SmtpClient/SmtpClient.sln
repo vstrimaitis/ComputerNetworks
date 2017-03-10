@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaygroundApp", "PlaygroundApp\PlaygroundApp.csproj", "{92C8E6AE-9690-423D-AF5E-269D94DED386}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mail", "Mail\Mail.csproj", "{FF373079-F226-47ED-9FC2-D9913F07B31D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{92C8E6AE-9690-423D-AF5E-269D94DED386}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92C8E6AE-9690-423D-AF5E-269D94DED386}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92C8E6AE-9690-423D-AF5E-269D94DED386}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF373079-F226-47ED-9FC2-D9913F07B31D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF373079-F226-47ED-9FC2-D9913F07B31D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF373079-F226-47ED-9FC2-D9913F07B31D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF373079-F226-47ED-9FC2-D9913F07B31D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

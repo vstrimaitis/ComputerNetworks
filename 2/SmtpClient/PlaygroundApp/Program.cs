@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Mail;
+using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TestApp
 {
@@ -18,7 +13,7 @@ namespace TestApp
         {
             string server = "smtp.gmail.com";
             int port = 465;
-            string username = "dnN0cmltYWl0aXNAZ21haWwuY29t";
+            /*string username = "dnN0cmltYWl0aXNAZ21haWwuY29t";
             string pass = "enJ3eWdic2NscWpueXh0ag==";
             using (var client = new TcpClient(server, port))
             {
@@ -40,6 +35,12 @@ namespace TestApp
                     Console.WriteLine(reader.ReadLine());
 
                 }
+            }*/
+            using (var client = new SmtpClient(server, port))
+            {
+                client.Credentials = new Credentials("vstrimaitis@gmail.com", "zrwygbsclqjnyxtj", System.Text.Encoding.UTF8);
+                Console.WriteLine(client.Credentials.Login);
+                Console.WriteLine(client.Credentials.Password);
             }
         }
     }
