@@ -1,9 +1,5 @@
 ﻿using Mail;
 using System;
-using System.IO;
-using System.Net;
-using System.Net.Security;
-using System.Net.Sockets;
 
 namespace TestApp
 {
@@ -22,28 +18,9 @@ namespace TestApp
                 client.Send(new MailMessage("vstrimaitis@gmail.com",
                                             "vstrimaitis@gmail.com",
                                             "Test email",
-                                            @"This is a test email
-
-It is nothing special at all
-
-Just a silly email
-thats it
-
-
-
-
-
-
-
-
-
-
-.
-
-
-
-
-;)"));
+                                            @"This is a test email with an attachment",
+                                            new string[] { @"C:\Users\vstri\Desktop\Capture.PNG",
+                                                           @"C:\Users\vstri\Desktop\hex_grid.pdf"}));
             }
         }
     }

@@ -28,7 +28,6 @@ namespace Mail
             From = new MailAddress(from);
             To = to.Select(x => new MailAddress(x));
             Subject = subject;
-            // dot stuffing
             Body = string.Join(Environment.NewLine, body.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)
                                                         .Select(x => x.Length > 0 && x[0] == '.' ? x = "." + x : x));
             Attachments = attachmentNames == null ? Enumerable.Empty<Attachment>() : attachmentNames.Select(x => new Attachment(x));
@@ -37,7 +36,6 @@ namespace Mail
 
         public string[] ToMimeString()
         {
-            // TODO
             var lines = new List<string>()
             {
                 "MIME-Version: 1.0",
@@ -47,6 +45,8 @@ namespace Mail
                 "Subject: " + Subject,
                 "Date: " + DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) + " +0000",
                 "--"+_boundary,
+                "Content-Type: text/plain; charset=\"utf-8\"",
+                "",
                 Body,
             };
             foreach(var a in Attachments)
