@@ -1,20 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Mail.Exceptions
+﻿namespace Mail.Exceptions
 {
-    public class ServiceNotAvailableException : Exception
+    public class ServiceNotAvailableException : SmtpException
     {
-        public ServiceNotAvailableException() : base()
-        { }
-
-        public ServiceNotAvailableException(string message) : base(message)
-        { }
-
-        public ServiceNotAvailableException(string message, Exception innerException) : base(message, innerException)
+        public ServiceNotAvailableException(Response r) : base("The service is not available.", r)
         { }
     }
 }

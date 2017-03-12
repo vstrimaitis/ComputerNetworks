@@ -35,11 +35,9 @@ namespace Mail
             set
             {
                 _credentials = value;
-                SendCommandWithResponse(SmtpCommands.AuthenticateLogin);
-                SendCommandWithResponse(_credentials.Login);
-                SendCommandWithResponse(_credentials.Password);
-                /*Debug.WriteLine(SendCommandWithResponse(SmtpCommands.AuthenticatePlain));
-                Debug.WriteLine(SendCommandWithResponse(_credentials.PlainLogin));*/
+                SendCommand(SmtpCommands.Authenticate, 334);
+                SendCommand(_credentials.Login, 334);
+                SendCommand(_credentials.Password, 235);
             }
         }
 
@@ -55,49 +53,51 @@ namespace Mail
 
             _responseManager = new ResponseManager(_reader);
             
-            Debug.WriteLine("<< "+_responseManager.GetResponse());
-            SendCommandWithResponse(string.Format("{0} {1}", SmtpCommands.HelloExtended, Dns.GetHostName()));
+            Debug.WriteLine("S:\t"+_responseManager.GetResponse());
+            SendCommand(string.Format("{0} {1}", SmtpCommands.Hello, Dns.GetHostName()), 250);
         }
-
+        
         public void Send(MailMessage message)
         {
-            SendCommandWithResponse(string.Format("{0} <{1}>", SmtpCommands.MailFrom, message.From.Address));
+            SendCommand(string.Format("{0} <{1}>", SmtpCommands.MailFrom, message.From.Address), 250);
             foreach(var r in message.To)
             {
-                SendCommandWithResponse(string.Format("{0} <{1}>", SmtpCommands.Recipient, r.Address));
+                SendCommand(string.Format("{0} <{1}>", SmtpCommands.Recipient, r.Address), 250);
             }
-            SendCommandWithResponse(SmtpCommands.MailData);
+            SendCommand(SmtpCommands.MailData, 354);
             foreach(var l in message.ToMimeString())
             {
                 SendCommand(l);
             }
 
-            Debug.WriteLine("<< "+_responseManager.GetResponse());
+            Debug.WriteLine("S:\t" + _responseManager.GetResponse());
         }
 
         public void Dispose()
         {
-            SendCommandWithResponse(SmtpCommands.Quit);
+            SendCommand(SmtpCommands.Quit, 221);
             _reader.Dispose();
             _writer.Dispose();
             _stream.Dispose();
             _client.Close();
         }
 
-        private void SendCommand(string command)
+        private void SendCommand(string command, int? expectedResponseCode = null)
         {
-            Debug.WriteLine(string.Format(">> {0}", command));
+            if(command.Length < 500)
+                Debug.WriteLine(string.Format("C:\t{0}", command));
             _writer.WriteLine(command);
             _writer.Flush();
-        }
-
-        private Response SendCommandWithResponse(string command)
-        {
-            SendCommand(command);
+            if (!expectedResponseCode.HasValue)
+                return;
             var resp = _responseManager.GetResponse();
             foreach (var l in resp.Message)
-                Debug.WriteLine(string.Format("<< {0}", l));
-            return resp;
+                Debug.WriteLine(string.Format("S:\t{0}", l));
+            if(resp.Code != expectedResponseCode.Value)
+            {
+                // HANDLE ERROR
+                Debug.WriteLine(string.Format("!!\tExpected {0}, got {1}", expectedResponseCode.Value, resp.Code));
+            }
         }
     }
 }

@@ -43,6 +43,7 @@
     <Compile Include="Attachment.cs" />
     <Compile Include="Credentials.cs" />
     <Compile Include="Exceptions\ServiceNotAvailableException.cs" />
+    <Compile Include="Exceptions\SmtpException.cs" />
     <Compile Include="MailMessage.cs" />
     <Compile Include="MimeHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

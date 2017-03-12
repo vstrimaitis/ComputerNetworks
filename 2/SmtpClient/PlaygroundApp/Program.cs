@@ -7,20 +7,24 @@ namespace TestApp
     {
         static void Main(string[] args)
         {
-            string server = "smtp.gmail.com";
-            int port = 465;
-            using (var client = new SmtpClient(server, port))
+            var accounts = new[]{
+                new { Host = new { Server = "smtp.gmail.com", Port = 465 }, Email = "vstrimaitis.cn@gmail.com", Pass = "ComputerNetwork"},
+                new { Host = new { Server = "smtp.mail.yahoo.com", Port = 465 }, Email = "vstrimaitis.cn@yahoo.com", Pass = "ComputerNetworkYahoo" },
+            };
+            int accIndex = 0;
+            using (var client = new SmtpClient(accounts[accIndex].Host.Server, accounts[accIndex].Host.Port))
             {
-                client.Credentials = new Credentials("vstrimaitis@gmail.com", "zrwygbsclqjnyxtj", System.Text.Encoding.UTF8);
-                Console.WriteLine(client.Credentials.Login);
-                Console.WriteLine(client.Credentials.Password);
+                client.Credentials = new Credentials(accounts[accIndex].Email, accounts[accIndex].Pass, System.Text.Encoding.UTF8);
 
-                client.Send(new MailMessage("vstrimaitis@gmail.com",
+                client.Send(new MailMessage(accounts[accIndex].Email,
+                                            new string[]{
                                             "vstrimaitis@gmail.com",
+                                            },
                                             "Test email",
                                             @"This is a test email with an attachment",
-                                            new string[] { @"C:\Users\vstri\Desktop\Capture.PNG",
-                                                           @"C:\Users\vstri\Desktop\hex_grid.pdf"}));
+                                            new string[] { /*@"C:\Users\vstri\Desktop\Capture.PNG",
+                                                           @"C:\Users\vstri\Desktop\hex_grid.pdf",*/
+                                                           @"C:\Users\vstri\OneDrive\Documents\Visual Studio 2017\Projects\Codeforces2017\Debug\CPP.exe"}));
             }
         }
     }

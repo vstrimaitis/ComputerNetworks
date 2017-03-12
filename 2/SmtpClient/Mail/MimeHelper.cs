@@ -8,7 +8,7 @@ namespace Mail
     public static class MimeHelper
     {
         private static Random _random = new Random();
-        private const string PossibleBoundaryCharacters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890'()+_,-./:=?";
+        private const string PossibleBoundaryCharacters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890";
         private const int UpperBoundaryLength = 30;
         private const int LowerBoundaryLength = 15;
         private static readonly Dictionary<string, string> _mimeTypes = new Dictionary<string, string>
