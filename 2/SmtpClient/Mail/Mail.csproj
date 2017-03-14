@@ -52,5 +52,11 @@
     <Compile Include="SmtpClient.cs" />
     <Compile Include="SmtpCommands.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Logging\Logging.csproj">
+      <Project>{02728756-298d-46e3-919c-f96c461d3ac1}</Project>
+      <Name>Logging</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

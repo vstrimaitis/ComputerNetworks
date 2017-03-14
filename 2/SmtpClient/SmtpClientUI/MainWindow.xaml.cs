@@ -1,4 +1,5 @@
-﻿using Mail;
+﻿using Logging;
+using Mail;
 using Mail.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -6,17 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
 namespace SmtpClientUI
 {
     /// <summary>
@@ -41,7 +32,7 @@ namespace SmtpClientUI
 
         public MainWindow()
         {
-            _client = new SmtpClient(_server, _port);
+            _client = new SmtpClient(_server, _port, new FileLogger("log.txt", true));
             _client.Credentials = new Credentials(_userEmail, _userPassword, Encoding.UTF8);
             InitializeComponent();
         }
@@ -100,6 +91,7 @@ namespace SmtpClientUI
                                              body,
                                              attachments?.Select(x => x.FullName))
                                              );
+                MessageBox.Show("Email sent successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.None);
             }
             catch(SmtpException ex)
             {

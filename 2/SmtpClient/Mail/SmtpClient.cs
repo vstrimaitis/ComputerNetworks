@@ -1,4 +1,5 @@
-﻿using Mail.Exceptions;
+﻿using Logging;
+using Mail.Exceptions;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -23,6 +24,7 @@ namespace Mail
         private StreamWriter _writer;
         private Credentials _credentials;
         private ResponseManager _responseManager;
+        private ILogger _logger;
 
         public string Host { get; private set; }
         public int Port { get; private set; }
@@ -42,10 +44,11 @@ namespace Mail
             }
         }
 
-        public SmtpClient(string host, int port)
+        public SmtpClient(string host, int port, ILogger logger = null)
         {
             Host = host;
             Port = port;
+            _logger = logger;
             _client = new TcpClient(host, port);
             _stream = new SslStream(_client.GetStream());
             _stream.AuthenticateAsClient(host);
@@ -54,7 +57,7 @@ namespace Mail
 
             _responseManager = new ResponseManager(_reader);
             
-            Debug.WriteLine("S:\t"+GetResponse());
+            _logger?.WriteLine("S:\t"+GetResponse());
             SendCommand(string.Format("{0} {1}", SmtpCommands.Hello, Dns.GetHostName()), 250);
         }
         
@@ -71,7 +74,7 @@ namespace Mail
                 SendCommand(l);
             }
 
-            Debug.WriteLine("S:\t" + GetResponse(250));
+            _logger?.WriteLine("S:\t" + GetResponse(250));
         }
 
         public void Dispose()
@@ -85,15 +88,14 @@ namespace Mail
 
         private void SendCommand(string command, int? expectedResponseCode = null)
         {
-            if(command.Length < 500)
-                Debug.WriteLine(string.Format("C:\t{0}", command));
+            _logger?.WriteLine(string.Format("C:\t{0}", command));
             _writer.WriteLine(command);
             _writer.Flush();
             if (!expectedResponseCode.HasValue)
                 return;
             var resp = GetResponse(expectedResponseCode);
             foreach (var l in resp.Message)
-                Debug.WriteLine(string.Format("S:\t{0}", l));
+                _logger?.WriteLine(string.Format("S:\t{0}", l));
         }
 
         private Response GetResponse(int? expectedCode = null)
@@ -101,7 +103,7 @@ namespace Mail
             var r = _responseManager.GetResponse();
             if (expectedCode.HasValue && r.Code != expectedCode.Value)
             {
-                Debug.WriteLine(string.Format("!!\tExpected {0}, got {1}", expectedCode.Value, r.Code));
+                _logger?.WriteLine(string.Format("!!\tExpected {0}, got {1}", expectedCode.Value, r.Code));
                 throw new ServiceNotAvailableException(r); // TODO
             }
             return r;

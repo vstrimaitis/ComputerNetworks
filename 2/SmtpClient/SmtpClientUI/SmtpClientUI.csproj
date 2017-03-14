@@ -95,6 +95,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Logging\Logging.csproj">
+      <Project>{02728756-298d-46e3-919c-f96c461d3ac1}</Project>
+      <Name>Logging</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Mail\Mail.csproj">
       <Project>{ff373079-f226-47ed-9fc2-d9913f07b31d}</Project>
       <Name>Mail</Name>
