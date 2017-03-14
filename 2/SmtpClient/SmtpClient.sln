@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaygroundApp", "Playground
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mail", "Mail\Mail.csproj", "{FF373079-F226-47ED-9FC2-D9913F07B31D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmtpClientUI", "SmtpClientUI\SmtpClientUI.csproj", "{E2362716-1A69-4BAB-ACE7-B5131552AFAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{FF373079-F226-47ED-9FC2-D9913F07B31D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF373079-F226-47ED-9FC2-D9913F07B31D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF373079-F226-47ED-9FC2-D9913F07B31D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2362716-1A69-4BAB-ACE7-B5131552AFAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2362716-1A69-4BAB-ACE7-B5131552AFAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2362716-1A69-4BAB-ACE7-B5131552AFAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2362716-1A69-4BAB-ACE7-B5131552AFAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -21,10 +21,7 @@ namespace TestApp
                                             "vstrimaitis@gmail.com",
                                             },
                                             "Test email",
-                                            @"This is a test email with an attachment",
-                                            new string[] { /*@"C:\Users\vstri\Desktop\Capture.PNG",
-                                                           @"C:\Users\vstri\Desktop\hex_grid.pdf",*/
-                                                           @"C:\Users\vstri\OneDrive\Documents\Visual Studio 2017\Projects\Codeforces2017\Debug\CPP.exe"}));
+                                            @"This is a test email with an attachment"));
             }
         }
     }
