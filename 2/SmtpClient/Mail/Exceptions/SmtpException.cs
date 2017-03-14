@@ -24,7 +24,7 @@ namespace Mail.Exceptions
             return string.Format("{0}{1}{1}Server response:{1}{2}",
                                     message,
                                     Environment.NewLine,
-                                    string.Join(Environment.NewLine, resp.Message));
+                                    string.Join(Environment.NewLine, resp.ShortMessage));
         }
     }
 }

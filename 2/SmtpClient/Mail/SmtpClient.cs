@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mail.Exceptions;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -53,7 +54,7 @@ namespace Mail
 
             _responseManager = new ResponseManager(_reader);
             
-            Debug.WriteLine("S:\t"+_responseManager.GetResponse());
+            Debug.WriteLine("S:\t"+GetResponse());
             SendCommand(string.Format("{0} {1}", SmtpCommands.Hello, Dns.GetHostName()), 250);
         }
         
@@ -70,7 +71,7 @@ namespace Mail
                 SendCommand(l);
             }
 
-            Debug.WriteLine("S:\t" + _responseManager.GetResponse());
+            Debug.WriteLine("S:\t" + GetResponse(250));
         }
 
         public void Dispose()
@@ -90,14 +91,20 @@ namespace Mail
             _writer.Flush();
             if (!expectedResponseCode.HasValue)
                 return;
-            var resp = _responseManager.GetResponse();
+            var resp = GetResponse(expectedResponseCode);
             foreach (var l in resp.Message)
                 Debug.WriteLine(string.Format("S:\t{0}", l));
-            if(resp.Code != expectedResponseCode.Value)
+        }
+
+        private Response GetResponse(int? expectedCode = null)
+        {
+            var r = _responseManager.GetResponse();
+            if (expectedCode.HasValue && r.Code != expectedCode.Value)
             {
-                // HANDLE ERROR
-                Debug.WriteLine(string.Format("!!\tExpected {0}, got {1}", expectedResponseCode.Value, resp.Code));
+                Debug.WriteLine(string.Format("!!\tExpected {0}, got {1}", expectedCode.Value, r.Code));
+                throw new ServiceNotAvailableException(r); // TODO
             }
+            return r;
         }
     }
 }

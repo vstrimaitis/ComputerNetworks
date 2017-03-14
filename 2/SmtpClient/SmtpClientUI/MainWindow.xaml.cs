@@ -95,7 +95,7 @@ namespace SmtpClientUI
             try
             {
                 _client.Send(new MailMessage(_userEmail,
-                                             Regex.Split(to, ";, "),
+                                             Regex.Split(to, "[;, ]").Where(x => !string.IsNullOrWhiteSpace(x)),
                                              subject,
                                              body,
                                              attachments?.Select(x => x.FullName))
@@ -104,6 +104,11 @@ namespace SmtpClientUI
             catch(SmtpException ex)
             {
                 MessageBox.Show(ex.Message, "Smtp error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            catch(FormatException ex)
+            {
+                MessageBox.Show(ex.Message, "Format exception", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             catch(Exception ex)
