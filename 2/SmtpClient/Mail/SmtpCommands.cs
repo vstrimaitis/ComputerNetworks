@@ -3,6 +3,7 @@
     static class SmtpCommands
     {
         public const string Hello = "HELO";
+        public const string HelloExtended = "EHLO";
         public const string Authenticate = "AUTH LOGIN";
         public const string MailFrom = "MAIL FROM:";
         public const string Recipient = "RCPT TO:";

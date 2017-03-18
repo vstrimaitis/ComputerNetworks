@@ -1,9 +1,7 @@
 ﻿using Logging;
 using Mail.Exceptions;
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -19,15 +17,14 @@ namespace Mail
     public class SmtpClient : IDisposable
     {
         private TcpClient _client;
-        private SslStream _stream;
+        private Stream _stream;
         private StreamReader _reader;
         private StreamWriter _writer;
         private Credentials _credentials;
         private ResponseManager _responseManager;
         private ILogger _logger;
-
-        public string Host { get; private set; }
-        public int Port { get; private set; }
+        
+        public MailServer Host { get; private set; }
 
         public Credentials Credentials
         {
@@ -38,29 +35,43 @@ namespace Mail
             set
             {
                 _credentials = value;
+                if (!_credentials.LoginPlain.EndsWith(Host.EmailDomain))
+                    _credentials.LoginPlain += "@" + Host.EmailDomain;
                 SendCommand(SmtpCommands.Authenticate, 334);
                 SendCommand(_credentials.Login, 334);
                 SendCommand(_credentials.Password, 235);
             }
         }
 
-        public SmtpClient(string host, int port, ILogger logger = null)
+        public SmtpClient(ILogger logger = null)
+        {
+            _logger = logger;
+        }
+
+        public void Connect(MailServer host)
         {
             Host = host;
-            Port = port;
-            _logger = logger;
-            _client = new TcpClient(host, port);
-            _stream = new SslStream(_client.GetStream());
-            _stream.AuthenticateAsClient(host);
+            _client = new TcpClient(Host.Server, Host.Port);
+            try
+            {
+                _stream = new SslStream(_client.GetStream());
+                ((SslStream)_stream).AuthenticateAsClient(Host.Server);
+            }
+            catch(Exception)
+            {
+                _client.Close();
+                _client = new TcpClient(Host.Server, Host.Port);
+                _stream = _client.GetStream();
+            }
             _reader = new StreamReader(_stream);
             _writer = new StreamWriter(_stream);
 
             _responseManager = new ResponseManager(_reader);
-            
-            _logger?.WriteLine("S:\t"+GetResponse());
-            SendCommand(string.Format("{0} {1}", SmtpCommands.Hello, Dns.GetHostName()), 250);
+
+            _logger?.WriteLine("S:\t" + GetResponse());
+            SendCommand(string.Format("{0} {1}", SmtpCommands.HelloExtended, Dns.GetHostName()), 250);
         }
-        
+
         public void Send(MailMessage message)
         {
             SendCommand(string.Format("{0} <{1}>", SmtpCommands.MailFrom, message.From.Address), 250);
@@ -79,11 +90,17 @@ namespace Mail
 
         public void Dispose()
         {
-            SendCommand(SmtpCommands.Quit, 221);
-            _reader.Dispose();
-            _writer.Dispose();
-            _stream.Dispose();
-            _client.Close();
+            try
+            {
+                SendCommand(SmtpCommands.Quit, 221);
+            }
+            catch (Exception)
+            { }
+            _logger?.Dispose();
+            _reader?.Dispose();
+            _writer?.Dispose();
+            _stream?.Dispose();
+            _client?.Close();
         }
 
         private void SendCommand(string command, int? expectedResponseCode = null)

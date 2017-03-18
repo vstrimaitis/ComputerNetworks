@@ -53,5 +53,10 @@ namespace Logging
         {
             _writer.Flush();
         }
+
+        public void Dispose()
+        {
+            _writer.Dispose();
+        }
     }
 }

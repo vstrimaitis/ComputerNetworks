@@ -1,6 +1,8 @@
-﻿namespace Logging
+﻿using System;
+
+namespace Logging
 {
-    public interface ILogger
+    public interface ILogger : IDisposable
     {
         bool AutoFlush { get; set; }
 

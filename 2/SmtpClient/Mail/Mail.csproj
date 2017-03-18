@@ -45,6 +45,7 @@
     <Compile Include="Exceptions\ServiceNotAvailableException.cs" />
     <Compile Include="Exceptions\SmtpException.cs" />
     <Compile Include="MailMessage.cs" />
+    <Compile Include="MailServer.cs" />
     <Compile Include="MimeHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Response.cs" />

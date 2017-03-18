@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmtpClientUI"
         mc:Ignorable="d"
-        Title="CN: Smtp Client" Height="370.733" Width="537.341">
+        Title="CN: Smtp Client" Height="370.733" Width="537.341" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <local:FileNameConverter x:Key="FileNameConverter" />
     </Window.Resources>

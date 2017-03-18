@@ -27,13 +27,10 @@ namespace SmtpClientUI
         private SmtpClient _client;
         private const string _server = "smtp.gmail.com";
         private const int _port = 465;
-        private const string _userEmail = "vstrimaitis.cn@gmail.com";
-        private const string _userPassword = "ComputerNetwork";
 
-        public MainWindow()
+        public MainWindow(SmtpClient client)
         {
-            _client = new SmtpClient(_server, _port, new FileLogger("log.txt", true));
-            _client.Credentials = new Credentials(_userEmail, _userPassword, Encoding.UTF8);
+            _client = client;
             InitializeComponent();
         }
         
@@ -85,7 +82,7 @@ namespace SmtpClientUI
 
             try
             {
-                _client.Send(new MailMessage(_userEmail,
+                _client.Send(new MailMessage(_client.Credentials.LoginPlain,
                                              Regex.Split(to, "[;, ]").Where(x => !string.IsNullOrWhiteSpace(x)),
                                              subject,
                                              body,
