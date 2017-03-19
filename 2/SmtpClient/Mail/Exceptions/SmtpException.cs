@@ -20,7 +20,7 @@ namespace Mail.Exceptions
 
         public SmtpException(string message, Response resp, Exception innerException) : base(message, innerException)
         {
-            FullResponse = string.Join(Environment.NewLine, resp.ShortMessage);
+            FullResponse = string.Join(" ", resp.ShortMessage);
         }
     }
 }

@@ -88,9 +88,19 @@ namespace SmtpClientUI
                                              );
                 MessageBox.Show("Email sent successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.None);
             }
+            catch(MailActionAbortedException ex)
+            {
+                DetailedMessageBox.Show(this, "The send action was aborted.", "Send error", ex.FullResponse, MessageBoxImage.Error);
+                return;
+            }
+            catch(ServiceNotAvailableException ex)
+            {
+                DetailedMessageBox.Show(this, ex.Message, "Send error", ex.FullResponse, MessageBoxImage.Error);
+                return;
+            }
             catch(SmtpException ex)
             {
-                MessageBox.Show(ex.Message, "Smtp error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DetailedMessageBox.Show(this, ex.Message, "Smtp error", ex.FullResponse, MessageBoxImage.Error);
                 return;
             }
             catch(FormatException ex)
@@ -100,7 +110,7 @@ namespace SmtpClientUI
             }
             catch(Exception ex)
             {
-                MessageBox.Show(string.Format("An unexpected error occurred...{0}{0}{1}", Environment.NewLine, ex.Message), "Unexpected error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DetailedMessageBox.Show(this, "An unexpected error occurred.", "Error", ex.Message, MessageBoxImage.Error);
                 return;
             }
         }

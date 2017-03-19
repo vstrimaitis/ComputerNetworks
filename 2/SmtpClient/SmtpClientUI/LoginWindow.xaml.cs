@@ -119,11 +119,6 @@ namespace SmtpClientUI
             }
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            _client?.Dispose();
-        }
-
         private void emailBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var email = emailBox.Text;
