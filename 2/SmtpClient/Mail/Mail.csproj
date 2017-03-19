@@ -42,6 +42,8 @@
   <ItemGroup>
     <Compile Include="Attachment.cs" />
     <Compile Include="Credentials.cs" />
+    <Compile Include="Exceptions\AuthenticationFailedException.cs" />
+    <Compile Include="Exceptions\MailActionAbortedException.cs" />
     <Compile Include="Exceptions\ServiceNotAvailableException.cs" />
     <Compile Include="Exceptions\SmtpException.cs" />
     <Compile Include="MailMessage.cs" />

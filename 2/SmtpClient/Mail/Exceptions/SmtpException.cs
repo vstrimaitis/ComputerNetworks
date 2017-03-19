@@ -4,6 +4,8 @@ namespace Mail.Exceptions
 {
     public class SmtpException : Exception
     {
+        public string FullResponse { get; private set; }
+
         public SmtpException() : base()
         { }
 
@@ -13,18 +15,12 @@ namespace Mail.Exceptions
         public SmtpException(string message, Exception innerException) : base(message, innerException)
         { }
 
-        public SmtpException(string message, Response resp) : base(FormMessage(message, resp))
+        public SmtpException(string message, Response resp) : this(message, resp, null)
         { }
 
-        public SmtpException(string message, Response resp, Exception innerException) : base(FormMessage(message, resp), innerException)
-        { }
-
-        private static string FormMessage(string message, Response resp)
+        public SmtpException(string message, Response resp, Exception innerException) : base(message, innerException)
         {
-            return string.Format("{0}{1}{1}Server response:{1}{2}",
-                                    message,
-                                    Environment.NewLine,
-                                    string.Join(Environment.NewLine, resp.ShortMessage));
+            FullResponse = string.Join(Environment.NewLine, resp.ShortMessage);
         }
     }
 }

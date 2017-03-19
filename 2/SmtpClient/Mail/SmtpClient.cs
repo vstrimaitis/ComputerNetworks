@@ -121,7 +121,14 @@ namespace Mail
             if (expectedCode.HasValue && r.Code != expectedCode.Value)
             {
                 _logger?.WriteLine(string.Format("!!\tExpected {0}, got {1}", expectedCode.Value, r.Code));
-                throw new ServiceNotAvailableException(r); // TODO
+                if (r.Code == 421)
+                    throw new ServiceNotAvailableException(r);
+                else if (r.Code == 535)
+                    throw new AuthenticationFailedException(r);
+                else if (r.Code == 552 || r.Code == 554 || r.Code == 451 || r.Code == 452)
+                    throw new MailActionAbortedException(r);
+                else
+                    throw new SmtpException("Something unexpected happened.", r);
             }
             return r;
         }

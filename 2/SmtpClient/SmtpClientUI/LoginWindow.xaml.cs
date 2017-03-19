@@ -63,10 +63,16 @@ namespace SmtpClientUI
                 mailWindow.Show();
                 this.Close();
             }
-            catch(SmtpException) // Add login failed exception
+            catch(AuthenticationFailedException ex)
             {
                 _client?.Dispose();
-                MessageBox.Show("Login failed", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            catch(SmtpException ex) // Add login failed exception
+            {
+                _client?.Dispose();
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             catch(FormatException)
