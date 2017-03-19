@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmtpClientUI"
         mc:Ignorable="d"
-        Title="Log in" Height="246.306" Width="335.2" WindowStartupLocation="CenterScreen">
+        Title="Log in" Height="246.306" Width="335.2" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
     <Grid>
         <Label Content="Log in" HorizontalAlignment="Left" Margin="10,10,0,0" HorizontalContentAlignment="Center" VerticalAlignment="Top" FontSize="30" FontWeight="Bold" Width="309"/>
         <Label Content="Server:" HorizontalAlignment="Left" Margin="10,68,0,0" VerticalAlignment="Top" Width="62"/>
@@ -13,7 +13,7 @@
                   ItemsSource="{Binding Path=Servers}"
                   DisplayMemberPath="Server"
                   SelectedValuePath="Server"
-                  SelectedValue="{Binding Path=Servers}"
+                  SelectedIndex="0"
                   IsEditable="True"
                   SelectionChanged="serverBox_SelectionChanged"
                   TextBoxBase.TextChanged="serverBox_TextChanged"
@@ -21,7 +21,7 @@
         <Label Content="Port:" HorizontalAlignment="Left" Margin="233,66,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="portBox" HorizontalAlignment="Left" Height="23" Margin="267,67,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="52"/>
         <Label Content="Email:" HorizontalAlignment="Left" Margin="10,96,0,0" VerticalAlignment="Top" Width="62"/>
-        <TextBox x:Name="emailBox" HorizontalAlignment="Left" Height="23" Margin="77,100,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="125"/>
+        <TextBox x:Name="emailBox" HorizontalAlignment="Left" Height="23" Margin="77,100,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="125" TextChanged="emailBox_TextChanged"/>
         <Label Content="@" HorizontalAlignment="Left" Margin="202,96,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="domainBox" HorizontalAlignment="Left" Height="23" Margin="223,99,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="96"/>
         <Label Content="Password:" HorizontalAlignment="Left" Margin="10,127,0,0" VerticalAlignment="Top" Width="62"/>

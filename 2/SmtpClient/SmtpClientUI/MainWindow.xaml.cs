@@ -25,8 +25,6 @@ namespace SmtpClientUI
         }
 
         private SmtpClient _client;
-        private const string _server = "smtp.gmail.com";
-        private const int _port = 465;
 
         public MainWindow(SmtpClient client)
         {
@@ -105,6 +103,19 @@ namespace SmtpClientUI
                 MessageBox.Show(string.Format("An unexpected error occurred...{0}{0}{1}", Environment.NewLine, ex.Message), "Unexpected error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+        }
+
+        private void logoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            _client.Dispose();
+            var loginWindow = new LoginWindow();
+            loginWindow.Show();
+            this.Close();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _client.Dispose();
         }
     }
 }

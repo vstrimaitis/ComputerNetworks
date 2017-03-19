@@ -35,7 +35,6 @@ namespace SmtpClientUI
         {
             InitializeComponent();
             serverBox.ItemsSource = Servers;
-            serverBox.SelectedIndex = 0;
         }
 
         private void okButton_Click(object sender, RoutedEventArgs e)
@@ -107,6 +106,24 @@ namespace SmtpClientUI
                 domainBox.IsEnabled = false;
                 domainBox.Text = ms.EmailDomain;
             }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _client?.Dispose();
+        }
+
+        private void emailBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var email = emailBox.Text;
+            if(!string.IsNullOrWhiteSpace(email) && email.Last() == '@')
+            {
+                emailBox.Text = email.Substring(0, email.Length - 1);
+                var tr = new TraversalRequest(FocusNavigationDirection.Next);
+                var focus = Keyboard.FocusedElement as UIElement;
+                focus?.MoveFocus(tr);
+            }
+            e.Handled = true;
         }
     }
 }
