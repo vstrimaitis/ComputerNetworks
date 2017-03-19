@@ -66,19 +66,19 @@ namespace SmtpClientUI
             catch(AuthenticationFailedException ex)
             {
                 _client?.Dispose();
-                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DetailedMessageBox.Show(this, ex.Message, "Log in error", ex.FullResponse, MessageBoxImage.Error);
                 return;
             }
-            catch(SmtpException ex) // Add login failed exception
+            catch(SmtpException ex)
             {
                 _client?.Dispose();
-                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DetailedMessageBox.Show(this, ex.Message, "Smtp error", ex.FullResponse, MessageBoxImage.Error);
                 return;
             }
             catch(FormatException)
             {
                 _client?.Dispose();
-                MessageBox.Show("Invalid email format!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Invalid email format!", "Email format error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             catch(Exception ex)

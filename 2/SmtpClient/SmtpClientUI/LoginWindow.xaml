@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmtpClientUI"
         mc:Ignorable="d"
-        Title="Log in" Height="246.306" Width="335.2" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
+        ResizeMode="NoResize"
+        Title="Log in" Height="246.306" Width="351.2" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
     <Grid>
         <Label Content="Log in" HorizontalAlignment="Left" Margin="10,10,0,0" HorizontalContentAlignment="Center" VerticalAlignment="Top" FontSize="30" FontWeight="Bold" Width="309"/>
         <Label Content="Server:" HorizontalAlignment="Left" Margin="10,68,0,0" VerticalAlignment="Top" Width="62"/>
