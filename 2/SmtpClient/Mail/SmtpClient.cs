@@ -127,7 +127,7 @@ namespace Mail
                     throw new AuthenticationFailedException(r);
                 else if (r.Code == 552 || r.Code == 554 || r.Code == 451 || r.Code == 452)
                     throw new MailActionAbortedException(r);
-                else
+                else if(r.Code / 100 == 4 || r.Code / 100 == 5)
                     throw new SmtpException("Something unexpected happened.", r);
             }
             return r;
