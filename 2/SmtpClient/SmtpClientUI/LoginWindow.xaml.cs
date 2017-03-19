@@ -39,18 +39,23 @@ namespace SmtpClientUI
 
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
+            string host = serverBox.Text;
+            int port;
+            string domain = domainBox.Text;
             string email = emailBox.Text;
             string password = passwordBox.Password;
-            if(string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            if(string.IsNullOrWhiteSpace(host)   ||
+               string.IsNullOrWhiteSpace(email)    ||
+               string.IsNullOrWhiteSpace(password) ||
+               string.IsNullOrWhiteSpace(domain)   ||
+               !int.TryParse(portBox.Text, out port))
             {
-                MessageBox.Show("You must fill in both fields", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("You must fill in all fields", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             try
             {
-                var server = serverBox.SelectedItem as MailServer;
-                if (server == null)
-                    server = new MailServer(serverBox.Text, int.Parse(portBox.Text), domainBox.Text);
+                var server = new MailServer(host, port, domain);
                 _client = new SmtpClient(new FileLogger(LogFile, true));
                 _client.Connect(server);
                 _client.Credentials = new Credentials(email, password, Encoding.UTF8);
