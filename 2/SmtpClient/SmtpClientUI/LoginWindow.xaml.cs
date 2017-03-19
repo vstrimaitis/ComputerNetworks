@@ -108,7 +108,7 @@ namespace SmtpClientUI
                 portBox.IsEnabled = true;
                 portBox.Text = "";
                 domainBox.IsEnabled = true;
-                domainBox.Text = "";
+                domainBox.Text = string.Join(".", serverBox.Text.Split('.').Reverse().Take(2).Reverse());
             }
             else
             {
