@@ -117,7 +117,6 @@ namespace SmtpClientUI
 
         private void logoutButton_Click(object sender, RoutedEventArgs e)
         {
-            _client.Dispose();
             var loginWindow = new LoginWindow();
             loginWindow.Show();
             this.Close();
