@@ -3,9 +3,6 @@ using System.IO;
 
 namespace Mail
 {
-    /*
-     * https://msdn.microsoft.com/en-us/library/ms526560(v=exchg.10).aspx
-     */
     public class Attachment
     {
         private byte[] _content;

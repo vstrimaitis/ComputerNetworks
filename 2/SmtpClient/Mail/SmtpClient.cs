@@ -8,12 +8,6 @@ using System.Net.Sockets;
 
 namespace Mail
 {
-    /*
-     * Return codes: http://www.greenend.org.uk/rjk/tech/smtpreplies.html#TURN
-     * http://www.serversmtp.com/en/smtp-error
-     * Status codes: https://www.usps.org/info/smtp_status.html
-     * More status codes: https://www.iana.org/assignments/smtp-enhanced-status-codes/smtp-enhanced-status-codes.xml
-     */
     public class SmtpClient : IDisposable
     {
         private TcpClient _client;
