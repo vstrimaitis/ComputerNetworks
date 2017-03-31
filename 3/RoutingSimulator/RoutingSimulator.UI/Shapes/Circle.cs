@@ -72,6 +72,17 @@ namespace RoutingSimulator.UI.Shapes
                     return _label.DesiredSize.Width;
                 }
             }
+            public double Opacity
+            {
+                get
+                {
+                    return _label.Opacity;
+                }
+                set
+                {
+                    _label.Opacity = value;
+                }
+            }
 
             public CircleLabel() : this(new SolidColorBrush(Colors.Black), null)
             { }
@@ -140,6 +151,17 @@ namespace RoutingSimulator.UI.Shapes
                 _label.Foreground = value;
             }
         }
+        public double Opacity
+        {
+            get
+            {
+                return _circle.Opacity;
+            }
+            set
+            {
+                _circle.Opacity = _label.Opacity = value;
+            }
+        }
         public double Radius
         {
             get
@@ -175,28 +197,28 @@ namespace RoutingSimulator.UI.Shapes
             }
         }
 
+        public event EventHandler<MouseEventArgs> MouseEnter;
+        public event EventHandler<MouseEventArgs> MouseLeave;
+
         public Circle() : this(1, new SolidColorBrush(Colors.White), new SolidColorBrush(Colors.Black), new SolidColorBrush(Colors.Black))
         { }
 
         public Circle(double radius) : this(radius, new SolidColorBrush(Colors.White), new SolidColorBrush(Colors.Black), new SolidColorBrush(Colors.Black))
         { }
 
-        public Circle(double radius, Brush fill, Brush stroke, Brush labelColor)
+        public Circle(double radius, Brush fill, Brush stroke, Brush labelColor, double opacity = 1)
         {
             _circle = new Ellipse();
+            _label = new CircleLabel();
             Radius = radius;
             Fill = fill;
             Stroke = stroke;
-            _label = new CircleLabel();
             Position = new Point(0, 0);
+            Opacity = opacity;
             _circle.MouseEnter += (s, e) => MouseEnter?.Invoke(this, e);
             _circle.MouseLeave += (s, e) => MouseLeave?.Invoke(this, e);
             _label.UILabel.MouseEnter += (s, e) => MouseEnter?.Invoke(this, e);
             _label.UILabel.MouseLeave += (s, e) => MouseLeave?.Invoke(this, e);
         }
-
-
-        public event EventHandler<MouseEventArgs> MouseEnter;
-        public event EventHandler<MouseEventArgs> MouseLeave;
     }
 }

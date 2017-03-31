@@ -21,8 +21,12 @@ namespace RoutingSimulator.UI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const double CircleRadius = 15;
+        private readonly Brush CircleFill = new SolidColorBrush(Colors.White);
+        private readonly Brush CircleStroke = new SolidColorBrush(Colors.Black);
+        private readonly Brush CircleLabelColor = new SolidColorBrush(Colors.Black);
         private Circle _previousCircle;
-        private Circle _hoveringOver;
+        private Circle _selectedCircle;
 
         public MainWindow()
         {
@@ -34,26 +38,27 @@ namespace RoutingSimulator.UI
             var pos = e.GetPosition(canvas);
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                if(_hoveringOver != null)
+                if(_selectedCircle != null)
                 {
-                    _hoveringOver.Position = new Point(pos.X - _hoveringOver.Radius, pos.Y - _hoveringOver.Radius);
+                    _selectedCircle.Position = new Point(pos.X - _selectedCircle.Radius, pos.Y - _selectedCircle.Radius);
                 }
                 else
                 {
                     if (_previousCircle == null)
                     {
-                        _previousCircle = new Circle(20, fill: new SolidColorBrush(Color.FromArgb(100, 255, 255, 255)),
-                                                         stroke: new SolidColorBrush(Color.FromArgb(100, 0, 0, 0)),
-                                                         labelColor: new SolidColorBrush(Color.FromArgb(100, 0, 0, 0)));
+                        _previousCircle = new Circle(CircleRadius, fill: CircleFill.Clone(),
+                                                                   stroke: CircleStroke.Clone(),
+                                                                   labelColor: CircleLabelColor.Clone(),
+                                                                   opacity: 0.5);
                         _previousCircle.MouseEnter += (s, args) =>
                         {
                             this.Cursor = Cursors.Hand;
-                            _hoveringOver = s as Circle;
+                            _selectedCircle = s as Circle;
                         };
                         _previousCircle.MouseLeave += (s, args) =>
                         {
                             this.Cursor = Cursors.Arrow;
-                            _hoveringOver = null;
+                            _selectedCircle = null;
                         };
                         foreach (var el in _previousCircle.UIElements)
                         {
@@ -74,9 +79,7 @@ namespace RoutingSimulator.UI
         {
             if (_previousCircle == null)
                 return;
-            _previousCircle.Fill = new SolidColorBrush(Colors.White);
-            _previousCircle.Stroke = new SolidColorBrush(Colors.Black);
-            _previousCircle.LabelColor = new SolidColorBrush(Colors.Black);
+            _previousCircle.Opacity = 1;
             _previousCircle = null;
         }
     }
