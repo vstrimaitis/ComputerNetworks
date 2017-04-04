@@ -45,12 +45,19 @@ namespace RoutingSimulator.UI
             {Mode.Delete, Cursors.Arrow },
             {Mode.Send, Cursors.Cross} 
         };
+        private Dictionary<Mode, string> _modeDescriptionMap = new Dictionary<Mode, string>()
+        {
+            {Mode.Default, "Left-click to add new routers, right-click to add connections between them." },
+            {Mode.Delete, "Left-click on a router to remove it." },
+            {Mode.Send, "Left-click and drag to connect two routers and send a packet between them." }
+        };
 
         public MainWindow()
         {
             InitializeMouseEventHandlers();
             InitializeComponent();
             EnableCanvasMouseEvents();
+            modeDescriptionLabel.Content = _modeDescriptionMap[_currentMode];
         }
 
         #region Helper Methods
@@ -360,6 +367,8 @@ namespace RoutingSimulator.UI
                     _currentMode = Mode.Default;
                     break;
             }
+            if(modeDescriptionLabel != null)
+                modeDescriptionLabel.Content = _modeDescriptionMap[_currentMode];
         }
     }
 }

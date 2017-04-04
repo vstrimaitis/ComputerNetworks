@@ -9,7 +9,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="25"></RowDefinition>
+            <RowDefinition Height="25"></RowDefinition>
         </Grid.RowDefinitions>
         <Canvas x:Name="canvas"
                 Grid.Row="0"
@@ -24,6 +25,8 @@
             <RadioButton VerticalAlignment="Center" x:Name="sendMode" Checked="mode_Checked"/>
             <Label VerticalAlignment="Center">Send packet</Label>
         </StackPanel>
-        
+        <Separator Grid.Row="2" VerticalAlignment="Top"/>
+        <Label Grid.Row="2" x:Name="modeDescriptionLabel"/>
+
     </Grid>
 </Window>
