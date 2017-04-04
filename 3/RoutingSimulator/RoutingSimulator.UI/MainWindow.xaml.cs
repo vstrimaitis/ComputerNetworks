@@ -263,11 +263,13 @@ namespace RoutingSimulator.UI
                     };
                     _tempLine.DragStart += (sender, e) =>
                     {
-                        (sender as Shapes.Line).Opacity = MovingOpacity;
+                        if(_currentMode == Mode.Default)
+                            (sender as Shapes.Line).Opacity = MovingOpacity;
                     };
                     _tempLine.DragEnd += (sender, e) =>
                     {
-                        (sender as Shapes.Line).Opacity = StationaryOpacity;
+                        if(_currentMode == Mode.Default)
+                            (sender as Shapes.Line).Opacity = StationaryOpacity;
                     };
                     canvas.Children.Add(_tempLine);
                 }
