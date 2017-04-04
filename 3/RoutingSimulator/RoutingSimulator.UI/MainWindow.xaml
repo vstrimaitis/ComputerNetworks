@@ -13,10 +13,10 @@
             <RowDefinition Height="25"></RowDefinition>
         </Grid.RowDefinitions>
         <Canvas x:Name="canvas"
-                Grid.Row="0"
-                Background="CornflowerBlue"
-                MouseLeftButtonDown="canvas_MouseLeftButtonDown"
-                />
+                    Grid.Row="0"
+                    Background="White"
+                    MouseLeftButtonDown="canvas_MouseLeftButtonDown"
+                    />
         <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
             <RadioButton IsChecked="True" VerticalAlignment="Center" x:Name="defaultMode" Checked="mode_Checked" />
             <Label VerticalAlignment="Center">Add/Move</Label>
@@ -25,6 +25,7 @@
             <RadioButton VerticalAlignment="Center" x:Name="sendMode" Checked="mode_Checked"/>
             <Label VerticalAlignment="Center">Send packet</Label>
         </StackPanel>
+        <Separator Grid.Row="1" VerticalAlignment="Top"/>
         <Separator Grid.Row="2" VerticalAlignment="Top"/>
         <Label Grid.Row="2" x:Name="modeDescriptionLabel"/>
 
