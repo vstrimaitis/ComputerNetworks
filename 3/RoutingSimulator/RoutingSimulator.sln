@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutingSimulator.UI", "RoutingSimulator.UI\RoutingSimulator.UI.csproj", "{1A718740-26C6-4F0D-9909-F14C5EB2F7B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutingSimulator.Core", "RoutingSimulator.Core\RoutingSimulator.Core.csproj", "{D1846C1A-58B3-4560-B0AD-B7DC9AFBB3E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{1A718740-26C6-4F0D-9909-F14C5EB2F7B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A718740-26C6-4F0D-9909-F14C5EB2F7B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A718740-26C6-4F0D-9909-F14C5EB2F7B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1846C1A-58B3-4560-B0AD-B7DC9AFBB3E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1846C1A-58B3-4560-B0AD-B7DC9AFBB3E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1846C1A-58B3-4560-B0AD-B7DC9AFBB3E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1846C1A-58B3-4560-B0AD-B7DC9AFBB3E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
