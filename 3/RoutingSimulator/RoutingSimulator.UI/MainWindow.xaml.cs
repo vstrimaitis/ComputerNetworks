@@ -21,6 +21,12 @@ namespace RoutingSimulator.UI
     /// </summary>
     public partial class MainWindow : Window
     {
+        enum Mode
+        {
+            Default,
+            Delete
+        }
+
         private const double MovingOpacity = 0.5;
         private const double StationaryOpacity = 1.0;
         private const double CircleRadius = 15;
@@ -28,26 +34,24 @@ namespace RoutingSimulator.UI
         private readonly Brush CircleStroke = new SolidColorBrush(Colors.Black);
         private readonly Brush CircleLabelColor = new SolidColorBrush(Colors.Black);
         private Shapes.Line _tempLine = null;
+        private Mode _currentMode = Mode.Default;
 
         public MainWindow()
         {
             InitializeMouseEventHandlers();
             InitializeComponent();
             EnableCanvasMouseEvents();
-        }
-
-        private void canvas_MouseMove(object sender, MouseEventArgs e)
-        {
-            var pos = e.GetPosition(canvas);
-            if (e.LeftButton == MouseButtonState.Pressed)
+            this.KeyDown += (s, e) =>
             {
-                if(Mouse.Captured == null)
+                if (e.Key == Key.LeftCtrl)
                 {
-                    var c = CreateCircle(true);
-                    canvas.Children.Add(c);
-                    Mouse.Capture(c.UIElements.Where(x => x is Ellipse).FirstOrDefault());
+                    _currentMode = Mode.Delete;
                 }
-            }
+            };
+            this.KeyUp += (s, e) =>
+            {
+                _currentMode = Mode.Default;
+            };
         }
 
         #region Helper Methods
@@ -82,96 +86,141 @@ namespace RoutingSimulator.UI
         {
             OnCircleMouseLeftButtonDown = (s, args) =>
             {
-                var c = s as Circle;
-                c.Opacity = MovingOpacity;
-                Mouse.Capture(c.UIElements.Where(x => x is Ellipse).FirstOrDefault() as UIElement);
+                if(_currentMode == Mode.Default)
+                {
+                    var c = s as Circle;
+                    c.Opacity = MovingOpacity;
+                    Mouse.Capture(c.UIElements.Where(x => x is Ellipse).FirstOrDefault() as UIElement);
+                }
+                else
+                {
+                    var c = s as Circle;
+                    canvas.Children.Remove(c);
+                    c.Dispose();
+                }
             };
             OnCircleMouseLeftButtonUp = (s, args) =>
             {
-                Mouse.Capture(null);
-                (s as Circle).Opacity = StationaryOpacity;
+                if(_currentMode == Mode.Default)
+                {
+                    Mouse.Capture(null);
+                    (s as Circle).Opacity = StationaryOpacity;
+                }
             };
             OnCircleMouseEnter = (s, args) =>
             {
-                this.Cursor = Cursors.Hand;
-                DisableCanvasMouseEvents();
-
-                if (_tempLine != null)
+                if(_currentMode == Mode.Default)
                 {
-                    _tempLine.End.PositionCenter = (s as Circle).PositionCenter;
+                    this.Cursor = Cursors.Hand;
+                    DisableCanvasMouseEvents();
+
+                    if (_tempLine != null)
+                    {
+                        _tempLine.End.PositionCenter = (s as Circle).PositionCenter;
+                    }
+                }
+                else
+                {
+                    this.Cursor = Cursors.No;
                 }
             };
             OnCircleMouseLeave = (s, args) =>
             {
-                this.Cursor = Cursors.Arrow;
-                EnableCanvasMouseEvents();
+                if(_currentMode == Mode.Default)
+                {
+                    this.Cursor = Cursors.Arrow;
+                    EnableCanvasMouseEvents();
+                }
+                else
+                {
+                    this.Cursor = Cursors.Arrow;
+                }
             };
             OnCircleMouseMove = (s, args) =>
             {
-                var c = s as Circle;
-                if(Mouse.Captured == c.UIElements.Where(x => x is Ellipse).FirstOrDefault())
+                if(_currentMode == Mode.Default)
                 {
-                    c.PositionCenter = args.GetPosition(canvas);
-                }
-                if (_tempLine != null)
-                {
-                    _tempLine.End.PositionCenter = (s as Circle).PositionCenter;
-                    args.Handled = true;
+                    var c = s as Circle;
+                    if(Mouse.Captured == c.UIElements.Where(x => x is Ellipse).FirstOrDefault())
+                    {
+                        c.PositionCenter = args.GetPosition(canvas);
+                    }
+                    if (_tempLine != null)
+                    {
+                        _tempLine.End.PositionCenter = (s as Circle).PositionCenter;
+                        args.Handled = true;
+                    }
                 }
             };
 
             OnEmptyCircleMouseMove += (sender, args) =>
             {
-                if (_tempLine == null)
-                    return;
-                if (args.RightButton == MouseButtonState.Pressed)
-                    _tempLine.End.PositionCenter = args.GetPosition(canvas);
-                else
-                    _tempLine = null;
+                if(_currentMode == Mode.Default)
+                {
+                    if (_tempLine == null)
+                        return;
+                    if (args.RightButton == MouseButtonState.Pressed)
+                        _tempLine.End.PositionCenter = args.GetPosition(canvas);
+                    else
+                        _tempLine = null;
+                }
             };
 
             OnCircleMouseRightButtonDown = (s, args) =>
             {
-                var start = s as Circle;
-                _tempLine = new Shapes.Line(start,
-                                            Circle.Empty,
-                                            new SolidColorBrush(Colors.Black),
-                                            new SolidColorBrush(Colors.Black),
-                                            MovingOpacity);
-                _tempLine.DragStart += (sender, e) =>
+                if(_currentMode == Mode.Default)
                 {
-                    (sender as Shapes.Line).Opacity = MovingOpacity;
-                };
-                _tempLine.DragEnd += (sender, e) =>
-                {
-                    (sender as Shapes.Line).Opacity = StationaryOpacity;
-                };
-                canvas.Children.Add(_tempLine);
+                    var start = s as Circle;
+                    _tempLine = new Shapes.Line(start,
+                                                Circle.Empty,
+                                                new SolidColorBrush(Colors.Black),
+                                                new SolidColorBrush(Colors.Black),
+                                                MovingOpacity);
+                    _tempLine.Disposing += (sender, e) =>
+                    {
+                        canvas.Children.Remove(sender as Shapes.Line);
+                    };
+                    _tempLine.DragStart += (sender, e) =>
+                    {
+                        (sender as Shapes.Line).Opacity = MovingOpacity;
+                    };
+                    _tempLine.DragEnd += (sender, e) =>
+                    {
+                        (sender as Shapes.Line).Opacity = StationaryOpacity;
+                    };
+                    canvas.Children.Add(_tempLine);
+                }
             };
 
             OnCircleMouseRightButtonUp = (s, args) =>
             {
-                if (_tempLine == null)
-                    return;
-                var c = s as Circle;
-                if (_tempLine.Start == c)
-                    return;
-                var window = new IntegerInputWindow(this);
-                window.InputEntered += (sender, e) =>
+                if(_currentMode == Mode.Default)
                 {
-                    _tempLine.LabelText = e.ToString();
-                    _tempLine.End = c;
-                    _tempLine.Opacity = StationaryOpacity;
-                    _tempLine = null;
-                };
-                window.ShowDialog();
+                    if (_tempLine == null)
+                        return;
+                    var c = s as Circle;
+                    if (_tempLine.Start == c)
+                        return;
+                    var window = new IntegerInputWindow(this);
+                    window.InputEntered += (sender, e) =>
+                    {
+                        _tempLine.LabelText = e.ToString();
+                        _tempLine.End = c;
+                        _tempLine.Opacity = StationaryOpacity;
+                        _tempLine = null;
+                    };
+                    window.ShowDialog();
+                }
             };
 
             OnEmptyCircleMouseRightButtonUp = (s, args) =>
             {
-                if (_tempLine != null)
-                    canvas.Children.Remove(_tempLine);
-                _tempLine = null;
+                if(_currentMode == Mode.Default)
+                {
+                    if (_tempLine != null)
+                        canvas.Children.Remove(_tempLine);
+                    _tempLine = null;
+                }
             };
 
         }
@@ -188,7 +237,24 @@ namespace RoutingSimulator.UI
             canvas.MouseRightButtonUp += OnEmptyCircleMouseRightButtonUp;
         }
 
-        
+
         #endregion
+
+        private void canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if(_currentMode == Mode.Default)
+            {
+                var pos = e.GetPosition(canvas);
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    if (Mouse.Captured == null)
+                    {
+                        var c = CreateCircle(true);
+                        canvas.Children.Add(c);
+                        Mouse.Capture(c.UIElements.Where(x => x is Ellipse).FirstOrDefault());
+                    }
+                }
+            }
+        }
     }
 }

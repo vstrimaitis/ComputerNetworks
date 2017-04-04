@@ -131,6 +131,10 @@ namespace RoutingSimulator.UI.Shapes
                 {
                     DragEnd?.Invoke(this, EventArgs.Empty);
                 };
+                _start.Disposing += (s, e) =>
+                {
+                    Disposing?.Invoke(this, e);
+                };
             }
         }
         public Circle End
@@ -154,6 +158,10 @@ namespace RoutingSimulator.UI.Shapes
                 _end.MouseLeftButtonUp += (s, e) =>
                 {
                     DragEnd?.Invoke(this, EventArgs.Empty);
+                };
+                _end.Disposing += (s, e) =>
+                {
+                    Disposing?.Invoke(this, e);
                 };
             }
         }
@@ -210,6 +218,7 @@ namespace RoutingSimulator.UI.Shapes
             }
         }
 
+        public event EventHandler Disposing;
         public event EventHandler DragStart;
         public event EventHandler DragEnd;
 

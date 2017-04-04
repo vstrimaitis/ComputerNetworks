@@ -9,6 +9,7 @@
     <Grid>
         <Canvas x:Name="canvas"
                 Background="CornflowerBlue"
-                MouseMove="canvas_MouseMove"/>
+                MouseLeftButtonDown="canvas_MouseLeftButtonDown"
+                />
     </Grid>
 </Window>

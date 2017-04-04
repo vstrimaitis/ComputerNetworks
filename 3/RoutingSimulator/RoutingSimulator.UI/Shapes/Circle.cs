@@ -11,7 +11,7 @@ using System.Windows.Shapes;
 
 namespace RoutingSimulator.UI.Shapes
 {
-    public class Circle
+    public class Circle : IDisposable
     {
         private class CircleLabel
         {
@@ -227,7 +227,8 @@ namespace RoutingSimulator.UI.Shapes
                 return new Circle();
             }
         }
-        
+
+        public event EventHandler Disposing;
         public event EventHandler<Point> PositionChanged;
         public event EventHandler<MouseEventArgs> MouseEnter;
         public event EventHandler<MouseEventArgs> MouseLeave;
@@ -278,6 +279,11 @@ namespace RoutingSimulator.UI.Shapes
             _label.UILabel.MouseRightButtonDown += (s, e) => MouseRightButtonDown?.Invoke(this, e);
             _label.UILabel.MouseRightButtonUp += (s, e) => MouseRightButtonUp?.Invoke(this, e);
             _label.UILabel.MouseMove += (s, e) => MouseMove?.Invoke(this, e);
+        }
+
+        public void Dispose()
+        {
+            Disposing?.Invoke(this, EventArgs.Empty);
         }
     }
 }
