@@ -81,12 +81,14 @@ namespace RoutingSimulator.UI.Shapes
             {
                 var mid = GetMiddlePoint(l);
                 Canvas.SetTop(_label, mid.Y);
-                Canvas.SetLeft(_label, mid.X);
+                Canvas.SetLeft(_label, mid.X - Width/2);
                 var angle = GetAngle(l) * 180 / Math.PI;
                 var transform = new TransformGroup();
                 if (Math.Abs(angle) > 90)
                     transform.Children.Add(new ScaleTransform() { ScaleY = -1, ScaleX = -1 });
-                transform.Children.Add(new RotateTransform(GetAngle(l) * 180 / Math.PI));
+                
+                transform.Children.Add(new RotateTransform(angle));
+                _label.RenderTransformOrigin = new Point(0.5, 0);
                 _label.RenderTransform = transform;
             }
 
