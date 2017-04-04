@@ -27,8 +27,6 @@ namespace RoutingSimulator.UI
         private readonly Brush CircleFill = new SolidColorBrush(Colors.White);
         private readonly Brush CircleStroke = new SolidColorBrush(Colors.Black);
         private readonly Brush CircleLabelColor = new SolidColorBrush(Colors.Black);
-        private Circle _previousCircle;
-        private Circle _selectedCircle;
 
         public MainWindow()
         {
@@ -88,13 +86,10 @@ namespace RoutingSimulator.UI
             OnCircleMouseEnter = (s, args) =>
             {
                 this.Cursor = Cursors.Hand;
-                _selectedCircle = s as Circle;
             };
             OnCircleMouseLeave = (s, args) =>
             {
                 this.Cursor = Cursors.Arrow;
-                if (Mouse.Captured == null)
-                    _selectedCircle = null;
             };
             OnCircleMouseMove = (s, args) =>
             {
