@@ -84,6 +84,17 @@ namespace RoutingSimulator.UI.Shapes
                 }
             }
 
+            public static CircleLabel Empty
+            {
+                get
+                {
+                    var l = new CircleLabel();
+                    _id--;
+                    l.Text = "";
+                    return l;
+                }
+            }
+
             public CircleLabel() : this(new SolidColorBrush(Colors.Black), null)
             { }
 
@@ -182,6 +193,7 @@ namespace RoutingSimulator.UI.Shapes
             set
             {
                 _position = value;
+                PositionChanged?.Invoke(this, _position);
                 Canvas.SetTop(_circle, _position.Y);
                 Canvas.SetLeft(_circle, _position.X);
                 Canvas.SetTop(_label.UILabel, _position.Y + _circle.Height / 2 - _label.Height / 2);
@@ -208,14 +220,31 @@ namespace RoutingSimulator.UI.Shapes
             }
         }
 
+        public static Circle Empty
+        {
+            get
+            {
+                return new Circle();
+            }
+        }
+        
+        public event EventHandler<Point> PositionChanged;
         public event EventHandler<MouseEventArgs> MouseEnter;
         public event EventHandler<MouseEventArgs> MouseLeave;
         public event EventHandler<MouseEventArgs> MouseLeftButtonDown;
         public event EventHandler<MouseEventArgs> MouseLeftButtonUp;
+        public event EventHandler<MouseEventArgs> MouseRightButtonDown;
+        public event EventHandler<MouseEventArgs> MouseRightButtonUp;
         public event EventHandler<MouseEventArgs> MouseMove;
 
-        public Circle() : this(1, new SolidColorBrush(Colors.White), new SolidColorBrush(Colors.Black), new SolidColorBrush(Colors.Black))
-        { }
+        private Circle()
+        {
+            _circle = new Ellipse();
+            _label = CircleLabel.Empty;
+            Radius = 0;
+            Position = new Point(0, 0);
+            InitMouseEvents();
+        }
 
         public Circle(double radius) : this(radius, new SolidColorBrush(Colors.White), new SolidColorBrush(Colors.Black), new SolidColorBrush(Colors.Black))
         { }
@@ -223,7 +252,7 @@ namespace RoutingSimulator.UI.Shapes
         public Circle(double radius, Brush fill, Brush stroke, Brush labelColor, double opacity = 1)
         {
             _circle = new Ellipse();
-            _label = new CircleLabel();
+            _label = new CircleLabel(labelColor, null);
             Radius = radius;
             Fill = fill;
             Stroke = stroke;
@@ -238,12 +267,16 @@ namespace RoutingSimulator.UI.Shapes
             _circle.MouseLeave += (s, e) => MouseLeave?.Invoke(this, e);
             _circle.MouseLeftButtonDown += (s, e) => MouseLeftButtonDown?.Invoke(this, e);
             _circle.MouseLeftButtonUp += (s, e) => MouseLeftButtonUp?.Invoke(this, e);
+            _circle.MouseRightButtonDown += (s, e) => MouseRightButtonDown?.Invoke(this, e);
+            _circle.MouseRightButtonUp += (s, e) => MouseRightButtonUp?.Invoke(this, e);
             _circle.MouseMove += (s, e) => MouseMove?.Invoke(this, e);
 
             _label.UILabel.MouseEnter += (s, e) => MouseEnter?.Invoke(this, e);
             _label.UILabel.MouseLeave += (s, e) => MouseLeave?.Invoke(this, e);
             _label.UILabel.MouseLeftButtonDown += (s, e) => MouseLeftButtonDown?.Invoke(this, e);
             _label.UILabel.MouseLeftButtonUp += (s, e) => MouseLeftButtonUp?.Invoke(this, e);
+            _label.UILabel.MouseRightButtonDown += (s, e) => MouseRightButtonDown?.Invoke(this, e);
+            _label.UILabel.MouseRightButtonUp += (s, e) => MouseRightButtonUp?.Invoke(this, e);
             _label.UILabel.MouseMove += (s, e) => MouseMove?.Invoke(this, e);
         }
     }
