@@ -21,6 +21,8 @@ namespace RoutingSimulator.UI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const double CircleMovingOpacity = 0.5;
+        private const double CircleStationaryOpacity = 1.0;
         private const double CircleRadius = 15;
         private readonly Brush CircleFill = new SolidColorBrush(Colors.White);
         private readonly Brush CircleStroke = new SolidColorBrush(Colors.Black);
@@ -30,6 +32,7 @@ namespace RoutingSimulator.UI
 
         public MainWindow()
         {
+            InitializeMouseEventHandlers();
             InitializeComponent();
         }
 
@@ -38,49 +41,70 @@ namespace RoutingSimulator.UI
             var pos = e.GetPosition(canvas);
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                if(_selectedCircle != null)
+                if(Mouse.Captured == null)
                 {
-                    _selectedCircle.Position = new Point(pos.X - _selectedCircle.Radius, pos.Y - _selectedCircle.Radius);
+                    var c = CreateCircle(true);
+                    canvas.Children.Add(c);
+                    Mouse.Capture(c.UIElements.Where(x => x is Ellipse).FirstOrDefault());
                 }
-                else
-                {
-                    if (_previousCircle == null)
-                    {
-                        _previousCircle = new Circle(CircleRadius, fill: CircleFill.Clone(),
-                                                                   stroke: CircleStroke.Clone(),
-                                                                   labelColor: CircleLabelColor.Clone(),
-                                                                   opacity: 0.5);
-                        _previousCircle.MouseEnter += (s, args) =>
-                        {
-                            this.Cursor = Cursors.Hand;
-                            _selectedCircle = s as Circle;
-                        };
-                        _previousCircle.MouseLeave += (s, args) =>
-                        {
-                            this.Cursor = Cursors.Arrow;
-                            _selectedCircle = null;
-                        };
-                        foreach (var el in _previousCircle.UIElements)
-                        {
-                            canvas.Children.Add(el);
-                        
-                        }
-                    }
-                    _previousCircle.Position = new Point(pos.X - _previousCircle.Radius, pos.Y - _previousCircle.Radius);
-                }
-            }
-            else if (_previousCircle != null)
-            {
-                _previousCircle = null;
             }
         }
 
-        private void canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        #region Helper Methods
+        private Circle CreateCircle(bool isTransaprent = true)
         {
-            if (_previousCircle == null)
-                return;
-            _previousCircle.Opacity = 1;
-            _previousCircle = null;
+            var c = new Circle(CircleRadius, fill: CircleFill.Clone(),
+                                                   stroke: CircleStroke.Clone(),
+                                                   labelColor: CircleLabelColor.Clone(),
+                                                   opacity: isTransaprent ? CircleMovingOpacity : CircleStationaryOpacity);
+            c.MouseLeftButtonDown += OnCircleMouseLeftButtonDown;
+            c.MouseLeftButtonUp += OnCircleMouseLeftButtonUp;
+            c.MouseEnter += OnCircleMouseEnter;
+            c.MouseLeave += OnCircleMouseLeave;
+            c.MouseMove += OnCircleMouseMove;
+            return c;
         }
+        #endregion
+
+        #region CircleMouseEventHandlers
+        private EventHandler<MouseEventArgs> OnCircleMouseLeftButtonDown;
+        private EventHandler<MouseEventArgs> OnCircleMouseLeftButtonUp;
+        private EventHandler<MouseEventArgs> OnCircleMouseEnter;
+        private EventHandler<MouseEventArgs> OnCircleMouseLeave;
+        private EventHandler<MouseEventArgs> OnCircleMouseMove;
+        private void InitializeMouseEventHandlers()
+        {
+            OnCircleMouseLeftButtonDown = (s, args) =>
+            {
+                var c = s as Circle;
+                c.Opacity = CircleMovingOpacity;
+                Mouse.Capture(c.UIElements.Where(x => x is Ellipse).FirstOrDefault() as UIElement);
+            };
+            OnCircleMouseLeftButtonUp = (s, args) =>
+            {
+                Mouse.Capture(null);
+                (s as Circle).Opacity = CircleStationaryOpacity;
+            };
+            OnCircleMouseEnter = (s, args) =>
+            {
+                this.Cursor = Cursors.Hand;
+                _selectedCircle = s as Circle;
+            };
+            OnCircleMouseLeave = (s, args) =>
+            {
+                this.Cursor = Cursors.Arrow;
+                if (Mouse.Captured == null)
+                    _selectedCircle = null;
+            };
+            OnCircleMouseMove = (s, args) =>
+            {
+                var c = s as Circle;
+                if(Mouse.Captured == c.UIElements.Where(x => x is Ellipse).FirstOrDefault())
+                {
+                    c.PositionCenter = args.GetPosition(canvas);
+                }
+            };
+        }
+        #endregion
     }
 }

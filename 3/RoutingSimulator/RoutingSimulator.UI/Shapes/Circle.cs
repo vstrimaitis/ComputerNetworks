@@ -188,6 +188,17 @@ namespace RoutingSimulator.UI.Shapes
                 Canvas.SetLeft(_label.UILabel, _position.X + _circle.Width / 2 - _label.Width / 2);
             }
         }
+        public Point PositionCenter
+        {
+            get
+            {
+                return new Point(_position.X + Radius, _position.Y + Radius);
+            }
+            set
+            {
+                Position = new Point(value.X - Radius, value.Y - Radius);
+            }
+        }
         public IEnumerable<UIElement> UIElements
         {
             get
@@ -199,6 +210,9 @@ namespace RoutingSimulator.UI.Shapes
 
         public event EventHandler<MouseEventArgs> MouseEnter;
         public event EventHandler<MouseEventArgs> MouseLeave;
+        public event EventHandler<MouseEventArgs> MouseLeftButtonDown;
+        public event EventHandler<MouseEventArgs> MouseLeftButtonUp;
+        public event EventHandler<MouseEventArgs> MouseMove;
 
         public Circle() : this(1, new SolidColorBrush(Colors.White), new SolidColorBrush(Colors.Black), new SolidColorBrush(Colors.Black))
         { }
@@ -215,10 +229,22 @@ namespace RoutingSimulator.UI.Shapes
             Stroke = stroke;
             Position = new Point(0, 0);
             Opacity = opacity;
+            InitMouseEvents();
+        }
+
+        private void InitMouseEvents()
+        {
             _circle.MouseEnter += (s, e) => MouseEnter?.Invoke(this, e);
             _circle.MouseLeave += (s, e) => MouseLeave?.Invoke(this, e);
+            _circle.MouseLeftButtonDown += (s, e) => MouseLeftButtonDown?.Invoke(this, e);
+            _circle.MouseLeftButtonUp += (s, e) => MouseLeftButtonUp?.Invoke(this, e);
+            _circle.MouseMove += (s, e) => MouseMove?.Invoke(this, e);
+
             _label.UILabel.MouseEnter += (s, e) => MouseEnter?.Invoke(this, e);
             _label.UILabel.MouseLeave += (s, e) => MouseLeave?.Invoke(this, e);
+            _label.UILabel.MouseLeftButtonDown += (s, e) => MouseLeftButtonDown?.Invoke(this, e);
+            _label.UILabel.MouseLeftButtonUp += (s, e) => MouseLeftButtonUp?.Invoke(this, e);
+            _label.UILabel.MouseMove += (s, e) => MouseMove?.Invoke(this, e);
         }
     }
 }
