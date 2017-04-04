@@ -7,9 +7,23 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
         <Canvas x:Name="canvas"
+                Grid.Row="0"
                 Background="CornflowerBlue"
                 MouseLeftButtonDown="canvas_MouseLeftButtonDown"
                 />
+        <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <RadioButton IsChecked="True" VerticalAlignment="Center" x:Name="defaultMode" Checked="mode_Checked" />
+            <Label VerticalAlignment="Center">Add/Move</Label>
+            <RadioButton VerticalAlignment="Center" x:Name="deleteMode" Checked="mode_Checked"/>
+            <Label VerticalAlignment="Center">Delete</Label>
+            <RadioButton VerticalAlignment="Center" x:Name="sendMode" Checked="mode_Checked"/>
+            <Label VerticalAlignment="Center">Send packet</Label>
+        </StackPanel>
+        
     </Grid>
 </Window>

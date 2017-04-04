@@ -176,6 +176,17 @@ namespace RoutingSimulator.UI.Shapes
                 _line.Stroke = value;
             }
         }
+        public DoubleCollection StrokeDash
+        {
+            get
+            {
+                return _line.StrokeDashArray;
+            }
+            set
+            {
+                _line.StrokeDashArray = value;
+            }
+        }
         public Brush LabelColor
         {
             get
@@ -222,7 +233,7 @@ namespace RoutingSimulator.UI.Shapes
         public event EventHandler DragStart;
         public event EventHandler DragEnd;
 
-        public Line(Circle start, Circle end, Brush stroke, Brush labelColor, double opacity)
+        public Line(Circle start, Circle end, Brush stroke, Brush labelColor, double opacity, double strokeDashLength = 0)
         {
             _line = new System.Windows.Shapes.Line();
             Canvas.SetZIndex(_line, int.MinValue);
@@ -232,6 +243,8 @@ namespace RoutingSimulator.UI.Shapes
             Stroke = stroke;
             LabelColor = labelColor;
             Opacity = opacity;
+            if(strokeDashLength > 0)
+                StrokeDash = new DoubleCollection() { strokeDashLength };
         }
 
         private void UpdatePosition()

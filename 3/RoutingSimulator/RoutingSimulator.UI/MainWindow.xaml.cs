@@ -1,6 +1,7 @@
 ﻿using RoutingSimulator.UI.Shapes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,37 +25,42 @@ namespace RoutingSimulator.UI
         enum Mode
         {
             Default,
-            Delete
+            Delete,
+            Send
         }
 
+        private const double SendLineDashLength = 5;
         private const double MovingOpacity = 0.5;
         private const double StationaryOpacity = 1.0;
         private const double CircleRadius = 15;
         private readonly Brush CircleFill = new SolidColorBrush(Colors.White);
         private readonly Brush CircleStroke = new SolidColorBrush(Colors.Black);
         private readonly Brush CircleLabelColor = new SolidColorBrush(Colors.Black);
+        private readonly Brush CommunicatingCircleFill = new SolidColorBrush(Colors.Yellow);
         private Shapes.Line _tempLine = null;
         private Mode _currentMode = Mode.Default;
+        private Dictionary<Mode, Cursor> _modeCursorMap = new Dictionary<Mode, Cursor>()
+        {
+            {Mode.Default, Cursors.Arrow },
+            {Mode.Delete, Cursors.Arrow },
+            {Mode.Send, Cursors.Cross} 
+        };
 
         public MainWindow()
         {
             InitializeMouseEventHandlers();
             InitializeComponent();
             EnableCanvasMouseEvents();
-            this.KeyDown += (s, e) =>
-            {
-                if (e.Key == Key.LeftCtrl)
-                {
-                    _currentMode = Mode.Delete;
-                }
-            };
-            this.KeyUp += (s, e) =>
-            {
-                _currentMode = Mode.Default;
-            };
         }
 
         #region Helper Methods
+        private void ResetCircleStyle(Circle c)
+        {
+            c.Fill = new SolidColorBrush(Colors.White);
+            c.Stroke = new SolidColorBrush(Colors.Black);
+            c.LabelColor = new SolidColorBrush(Colors.Black);
+            c.Opacity = StationaryOpacity;
+        }
         private Circle CreateCircle(bool isTransaprent = true)
         {
             var c = new Circle(CircleRadius, fill: CircleFill.Clone(),
@@ -82,6 +88,7 @@ namespace RoutingSimulator.UI
         private EventHandler<MouseEventArgs> OnCircleMouseMove;
         private MouseEventHandler OnEmptyCircleMouseMove;
         private MouseButtonEventHandler OnEmptyCircleMouseRightButtonUp;
+        private MouseButtonEventHandler OnEmptyCircleMouseLeftButtonUp;
         private void InitializeMouseEventHandlers()
         {
             OnCircleMouseLeftButtonDown = (s, args) =>
@@ -92,11 +99,22 @@ namespace RoutingSimulator.UI
                     c.Opacity = MovingOpacity;
                     Mouse.Capture(c.UIElements.Where(x => x is Ellipse).FirstOrDefault() as UIElement);
                 }
-                else
+                else if(_currentMode == Mode.Delete)
                 {
                     var c = s as Circle;
                     canvas.Children.Remove(c);
                     c.Dispose();
+                }
+                else if(_currentMode == Mode.Send)
+                {
+                    var start = s as Circle;
+                    start.Fill = CommunicatingCircleFill.Clone();
+                    _tempLine = new Shapes.Line(start,
+                                            Circle.Empty,
+                                            new SolidColorBrush(Colors.Red),
+                                            new SolidColorBrush(Colors.Red),
+                                            MovingOpacity, SendLineDashLength);
+                    canvas.Children.Add(_tempLine);
                 }
             };
             OnCircleMouseLeftButtonUp = (s, args) =>
@@ -105,6 +123,15 @@ namespace RoutingSimulator.UI
                 {
                     Mouse.Capture(null);
                     (s as Circle).Opacity = StationaryOpacity;
+                }
+                else if(_currentMode == Mode.Send)
+                {
+                    var c = s as Circle;
+                    if (_tempLine == null || _tempLine.Start == c)
+                        return;
+                    ResetCircleStyle(_tempLine.Start);
+                    ResetCircleStyle(c);
+                    // send a packet from _tempLine.Start to _tempLine.End
                 }
             };
             OnCircleMouseEnter = (s, args) =>
@@ -119,9 +146,19 @@ namespace RoutingSimulator.UI
                         _tempLine.End.PositionCenter = (s as Circle).PositionCenter;
                     }
                 }
-                else
+                else if (_currentMode == Mode.Delete)
                 {
                     this.Cursor = Cursors.No;
+                }
+                else if (_currentMode == Mode.Send)
+                {
+                    var c = s as Circle;
+                    if(_tempLine != null)
+                    {
+                        _tempLine.End.PositionCenter = c.PositionCenter;
+                        if (c != _tempLine.Start)
+                            c.Fill = CommunicatingCircleFill.Clone();
+                    }
                 }
             };
             OnCircleMouseLeave = (s, args) =>
@@ -131,9 +168,15 @@ namespace RoutingSimulator.UI
                     this.Cursor = Cursors.Arrow;
                     EnableCanvasMouseEvents();
                 }
-                else
+                else if (_currentMode == Mode.Delete)
                 {
                     this.Cursor = Cursors.Arrow;
+                }
+                else if(_currentMode == Mode.Send)
+                {
+                    var c = s as Circle;
+                    if (_tempLine != null && _tempLine.Start != c)
+                        ResetCircleStyle(c);
                 }
             };
             OnCircleMouseMove = (s, args) =>
@@ -141,10 +184,27 @@ namespace RoutingSimulator.UI
                 if(_currentMode == Mode.Default)
                 {
                     var c = s as Circle;
+                    var pos = args.GetPosition(canvas);
+                    if (pos.X < CircleRadius)
+                        pos.X = CircleRadius;
+                    if (pos.X >= canvas.ActualWidth - CircleRadius)
+                        pos.X = canvas.ActualWidth - CircleRadius;
+                    if (pos.Y < CircleRadius)
+                        pos.Y = CircleRadius;
+                    if (pos.Y >= canvas.ActualHeight - CircleRadius)
+                        pos.Y = canvas.ActualHeight - CircleRadius;
                     if(Mouse.Captured == c.UIElements.Where(x => x is Ellipse).FirstOrDefault())
                     {
-                        c.PositionCenter = args.GetPosition(canvas);
+                        c.PositionCenter = pos;
                     }
+                    if (_tempLine != null)
+                    {
+                        _tempLine.End.PositionCenter = (s as Circle).PositionCenter;
+                        args.Handled = true;
+                    }
+                }
+                else if(_currentMode == Mode.Send)
+                {
                     if (_tempLine != null)
                     {
                         _tempLine.End.PositionCenter = (s as Circle).PositionCenter;
@@ -155,14 +215,28 @@ namespace RoutingSimulator.UI
 
             OnEmptyCircleMouseMove += (sender, args) =>
             {
+                var pos = args.GetPosition(canvas);
                 if(_currentMode == Mode.Default)
                 {
+                    if (pos.X < 0)
+                        pos.X = 0;
+                    if (pos.X >= canvas.ActualWidth)
+                        pos.X = canvas.ActualWidth - 1;
+                    if (pos.Y < 0)
+                        pos.Y = 0;
+                    if (pos.Y >= canvas.ActualHeight)
+                        pos.Y = canvas.ActualHeight - 1;
                     if (_tempLine == null)
                         return;
                     if (args.RightButton == MouseButtonState.Pressed)
-                        _tempLine.End.PositionCenter = args.GetPosition(canvas);
+                        _tempLine.End.PositionCenter = pos;
                     else
                         _tempLine = null;
+                }
+                else if(_currentMode == Mode.Send)
+                {
+                    if (_tempLine != null)
+                        _tempLine.End.PositionCenter = pos;
                 }
             };
 
@@ -194,7 +268,7 @@ namespace RoutingSimulator.UI
 
             OnCircleMouseRightButtonUp = (s, args) =>
             {
-                if(_currentMode == Mode.Default)
+                if (_currentMode == Mode.Default)
                 {
                     if (_tempLine == null)
                         return;
@@ -215,7 +289,7 @@ namespace RoutingSimulator.UI
 
             OnEmptyCircleMouseRightButtonUp = (s, args) =>
             {
-                if(_currentMode == Mode.Default)
+                if (_currentMode == Mode.Default)
                 {
                     if (_tempLine != null)
                         canvas.Children.Remove(_tempLine);
@@ -223,18 +297,32 @@ namespace RoutingSimulator.UI
                 }
             };
 
+            OnEmptyCircleMouseLeftButtonUp = (s, args) =>
+            {
+                if (_currentMode == Mode.Send)
+                {
+                    if (_tempLine != null)
+                    {
+                        canvas.Children.Remove(_tempLine);
+                        ResetCircleStyle(_tempLine.Start);
+                    }
+                    _tempLine = null;
+                }
+            };
         }
 
         private void DisableCanvasMouseEvents()
         {
             canvas.MouseMove -= OnEmptyCircleMouseMove;
             canvas.MouseRightButtonUp -= OnEmptyCircleMouseRightButtonUp;
+            canvas.MouseLeftButtonUp -= OnEmptyCircleMouseLeftButtonUp;
         }
 
         private void EnableCanvasMouseEvents()
         {
             canvas.MouseMove += OnEmptyCircleMouseMove;
             canvas.MouseRightButtonUp += OnEmptyCircleMouseRightButtonUp;
+            canvas.MouseLeftButtonUp += OnEmptyCircleMouseLeftButtonUp;
         }
 
 
@@ -254,6 +342,23 @@ namespace RoutingSimulator.UI
                         Mouse.Capture(c.UIElements.Where(x => x is Ellipse).FirstOrDefault());
                     }
                 }
+            }
+        }
+
+        private void mode_Checked(object sender, RoutedEventArgs e)
+        {
+            var rb = sender as RadioButton;
+            switch(rb.Name)
+            {
+                case "deleteMode":
+                    _currentMode = Mode.Delete;
+                    break;
+                case "sendMode":
+                    _currentMode = Mode.Send;
+                    break;
+                default:
+                    _currentMode = Mode.Default;
+                    break;
             }
         }
     }
