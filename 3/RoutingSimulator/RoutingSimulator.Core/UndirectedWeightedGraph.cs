@@ -11,6 +11,14 @@ namespace RoutingSimulator.Core
         private ISet<Node<TNode>> _nodes;
         private IDictionary<Node<TNode>, ISet<Edge<TNode>>> _adjacencyList;
 
+        public IEnumerable<Node<TNode>> Nodes
+        {
+            get
+            {
+                return _nodes;
+            }
+        }
+
         public UndirectedWeightedGraph()
         {
             _nodes = new HashSet<Node<TNode>>();
