@@ -75,7 +75,6 @@ namespace RoutingSimulator.UI.Shapes
             {
                 _label = new Label();
                 Foreground = foreground;
-                Text = "69";
             }
 
             public void MoveTo(Line l)

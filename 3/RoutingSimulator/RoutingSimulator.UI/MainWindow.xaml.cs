@@ -156,9 +156,15 @@ namespace RoutingSimulator.UI
                 var c = s as Circle;
                 if (_tempLine.Start == c)
                     return;
-                _tempLine.End = c;
-                _tempLine.Opacity = StationaryOpacity;
-                _tempLine = null;
+                var window = new IntegerInputWindow(this);
+                window.InputEntered += (sender, e) =>
+                {
+                    _tempLine.LabelText = e.ToString();
+                    _tempLine.End = c;
+                    _tempLine.Opacity = StationaryOpacity;
+                    _tempLine = null;
+                };
+                window.ShowDialog();
             };
 
             OnEmptyCircleMouseRightButtonUp = (s, args) =>

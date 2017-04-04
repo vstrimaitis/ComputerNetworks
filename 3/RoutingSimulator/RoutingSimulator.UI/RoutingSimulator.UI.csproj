@@ -55,8 +55,15 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Extensions.cs" />
+    <Compile Include="IntegerInputWindow.xaml.cs">
+      <DependentUpon>IntegerInputWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Shapes\Circle.cs" />
     <Compile Include="Shapes\Line.cs" />
+    <Page Include="IntegerInputWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
