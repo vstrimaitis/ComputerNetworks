@@ -61,5 +61,10 @@ namespace RoutingSimulator.Core
         {
             return Destination == other.Destination;
         }
+
+        public override string ToString()
+        {
+            return Destination + "<--" + Next + ":" + Distance;
+        }
     }
 }
