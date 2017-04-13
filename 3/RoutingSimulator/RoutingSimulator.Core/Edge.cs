@@ -32,5 +32,10 @@ namespace RoutingSimulator.Core
         {
             return Tuple.Create(Node1, Node2, Weight).GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return Node1 + "--" + Node2;
+        }
     }
 }

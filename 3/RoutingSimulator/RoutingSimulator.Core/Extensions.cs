@@ -11,7 +11,7 @@ namespace RoutingSimulator.Core
             var toRemove = new List<T>();
             foreach(var i in set)
             {
-                if (!pred(i))
+                if (pred(i))
                     toRemove.Add(i);
             }
             var cnt = 0;

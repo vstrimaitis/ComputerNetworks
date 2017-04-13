@@ -9,7 +9,7 @@ namespace RoutingSimulator.Core
     public class UndirectedWeightedGraph<TNode> where TNode : IComparable<TNode>, IEquatable<TNode>
     {
         private ISet<Node<TNode>> _nodes;
-        private IDictionary<Node<TNode>, ISet<Edge<TNode>>> _adjacencyList;
+        //private IDictionary<Node<TNode>, ISet<Edge<TNode>>> _adjacencyList;
 
         public IEnumerable<Node<TNode>> Nodes
         {
@@ -22,7 +22,7 @@ namespace RoutingSimulator.Core
         public UndirectedWeightedGraph()
         {
             _nodes = new HashSet<Node<TNode>>();
-            _adjacencyList = new Dictionary<Node<TNode>, ISet<Edge<TNode>>>();
+            //_adjacencyList = new Dictionary<Node<TNode>, ISet<Edge<TNode>>>();
         }
 
         public bool AddNode(Node<TNode> node)
@@ -30,7 +30,7 @@ namespace RoutingSimulator.Core
             if (_nodes.Contains(node))
                 return false;
             _nodes.Add(node);
-            _adjacencyList.Add(node, new HashSet<Edge<TNode>>());
+            //_adjacencyList.Add(node, new HashSet<Edge<TNode>>());
             return true;
         }
 
@@ -39,12 +39,10 @@ namespace RoutingSimulator.Core
             if (!_nodes.Contains(node))
                 return false;
             _nodes.Remove(node);
-            _adjacencyList.Remove(node);
-            foreach(var neigh in _adjacencyList.Values)
+            foreach(var neigh in node.Neighbours)
             {
-                neigh.RemoveWhere(x => node == x.Node1 || node == x.Node2);
+                neigh.RemoveNeighbour(node);
             }
-                
             return true;
         }
 
@@ -55,29 +53,16 @@ namespace RoutingSimulator.Core
         {
             if (!_nodes.Contains(edge.Node1) || !_nodes.Contains(edge.Node2))
                 throw new NodeDoesNotExistException("The specified node does not exist in this graph.");
-            _adjacencyList[edge.Node1].Add(edge);
-            _adjacencyList[edge.Node2].Add(edge);
-            edge.Node1.DistanceVectorUpdated += (s, e) =>
-            {
-                MergeDistanceVectors(s as Node<TNode>, edge.Node2, edge.Weight);
-            };
-            edge.Node2.DistanceVectorUpdated += (s, e) =>
-            {
-                MergeDistanceVectors(s as Node<TNode>, edge.Node1, edge.Weight);
-            };
-            MergeDistanceVectors(edge.Node1, edge.Node2, edge.Weight);
+            edge.Node1.AddNeighbour(edge.Node2, edge.Weight);
+            edge.Node2.AddNeighbour(edge.Node1, edge.Weight);
         }
 
         public void RemoveEdge(Edge<TNode> edge)
         {
-            if(_adjacencyList.ContainsKey(edge.Node1))
-            {
-                _adjacencyList[edge.Node1].Remove(edge);
-            }
-            if(_adjacencyList.ContainsKey(edge.Node2))
-            {
-                _adjacencyList[edge.Node2].Remove(edge);
-            }
+            if (!_nodes.Contains(edge.Node1) || !_nodes.Contains(edge.Node2))
+                return;
+            edge.Node1.RemoveNeighbour(edge.Node2);
+            edge.Node2.RemoveNeighbour(edge.Node1);
         }
 
         private void MergeDistanceVectors(Node<TNode> node1, Node<TNode> node2, long distance)

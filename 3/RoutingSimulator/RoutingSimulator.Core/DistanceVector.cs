@@ -5,7 +5,8 @@ using System.Text;
 
 namespace RoutingSimulator.Core
 {
-    public class DistanceVector<TNode> where TNode : IComparable<TNode>, IEquatable<TNode>
+    public class DistanceVector<TNode> : IEquatable<DistanceVector<TNode>>
+                           where TNode : IComparable<TNode>, IEquatable<TNode>
     {
         private ISet<DistanceVectorEntry<TNode>> _entries;
         public Node<TNode> Source { get; private set; }
@@ -37,9 +38,27 @@ namespace RoutingSimulator.Core
             _entries.Add(entry);
         }
 
-        public void RemoveDestination(Node<TNode> dst)
+        public void RemoveNode(Node<TNode> dst)
         {
-            _entries.RemoveWhere(x => x.Destination == dst);
+            _entries.RemoveWhere(x => x.Destination == dst || x.Next == dst);
+        }
+
+        public bool Equals(DistanceVector<TNode> other)
+        {
+            var entries = other.Entries.ToList();
+            if (_entries.Count != entries.Count)
+                return false;
+            foreach(var entry in _entries)
+            {
+                var row = entries.Where(x => x.Destination == entry.Destination).FirstOrDefault();
+                if (row == null)
+                    return false;
+                if (row.Distance != entry.Distance)
+                    return false;
+                if (row.Next != entry.Next)
+                    return false;
+            }
+            return true;
         }
     }
 
