@@ -43,7 +43,7 @@ namespace RoutingSimulator.UI
         private readonly Brush CircleFill = new SolidColorBrush(Colors.White);
         private readonly Brush CircleStroke = new SolidColorBrush(Colors.Black);
         private readonly Brush CircleLabelColor = new SolidColorBrush(Colors.Black);
-        private readonly Brush CommunicatingCircleFill = new SolidColorBrush(Colors.Yellow);
+        private readonly Brush CommunicatingCircleFill = new SolidColorBrush(Colors.Red);
         private readonly Brush LineStroke = new SolidColorBrush(Colors.Black);
         private readonly Brush PathLineStroke = new SolidColorBrush(Colors.Red);
         private List<Shapes.Line> _lines = new List<Shapes.Line>();
@@ -206,10 +206,15 @@ namespace RoutingSimulator.UI
                             lines.Add(line);
                         }
                         ResetAllStyles();
+                        var circles = _circleNodeMap.Where(x => path.Contains(x.Value)).Select(x => x.Key);
                         foreach(var line in lines)
                         {
                             line.Stroke = PathLineStroke;
                             line.Thickness = PathLineThickness;
+                        }
+                        foreach(var circle in circles)
+                        {
+                            circle.Fill = CommunicatingCircleFill;
                         }
                     }
                     catch(PathDoesNotExistException)
@@ -399,7 +404,6 @@ namespace RoutingSimulator.UI
                     if (_tempLine != null)
                     {
                         canvas.Children.Remove(_tempLine);
-                        ResetCircleStyle(_tempLine.Start);
                     }
                     _tempLine = null;
                 }

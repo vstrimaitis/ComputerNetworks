@@ -30,6 +30,8 @@ namespace RoutingSimulator.UI
 
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(inputBox.Text))
+                return;
             var input = int.Parse(inputBox.Text);
             InputEntered?.Invoke(this, input);
             this.Close();
