@@ -1,4 +1,6 @@
-﻿using RoutingSimulator.UI.Shapes;
+﻿using RoutingSimulator.Core;
+using RoutingSimulator.Core.Exceptions;
+using RoutingSimulator.UI.Shapes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace RoutingSimulator.UI
 {
@@ -29,14 +32,22 @@ namespace RoutingSimulator.UI
             Send
         }
 
+        private DispatcherTimer _timer = new DispatcherTimer();
+
         private const double SendLineDashLength = 5;
         private const double MovingOpacity = 0.5;
         private const double StationaryOpacity = 1.0;
         private const double CircleRadius = 15;
+        private const double LineThickness = 1.0;
+        private const double PathLineThickness = 3.0;
         private readonly Brush CircleFill = new SolidColorBrush(Colors.White);
         private readonly Brush CircleStroke = new SolidColorBrush(Colors.Black);
         private readonly Brush CircleLabelColor = new SolidColorBrush(Colors.Black);
         private readonly Brush CommunicatingCircleFill = new SolidColorBrush(Colors.Yellow);
+        private readonly Brush LineStroke = new SolidColorBrush(Colors.Black);
+        private readonly Brush PathLineStroke = new SolidColorBrush(Colors.Red);
+        private List<Shapes.Line> _lines = new List<Shapes.Line>();
+        private List<Shapes.Circle> _circles = new List<Shapes.Circle>();
         private Shapes.Line _tempLine = null;
         private Mode _currentMode = Mode.Default;
         private Dictionary<Mode, Cursor> _modeCursorMap = new Dictionary<Mode, Cursor>()
@@ -52,12 +63,27 @@ namespace RoutingSimulator.UI
             {Mode.Send, "Left-click and drag to connect two routers and send a packet between them." }
         };
 
+        private UndirectedWeightedGraph<string> graph;
+        private Dictionary<Circle, Node<string>> _circleNodeMap = new Dictionary<Circle, Node<string>>();
+        private Dictionary<Shapes.Line, Tuple<Node<string>, Node<string>>> _lineNodeMap = new Dictionary<Shapes.Line, Tuple<Node<string>, Node<string>>>();
+
         public MainWindow()
         {
             InitializeMouseEventHandlers();
             InitializeComponent();
             EnableCanvasMouseEvents();
             modeDescriptionLabel.Content = _modeDescriptionMap[_currentMode];
+            graph = new UndirectedWeightedGraph<string>();
+            _timer.Tick += (s, e) =>
+            {
+                graph.Tick();
+            };
+            _timer.Interval = new TimeSpan(0, 0, 0, 0, 10); // every 10ms
+            _timer.Start();
+            canvas.PreviewMouseDown += (s, e) =>
+            {
+                ResetAllStyles();
+            };
         }
 
         #region Helper Methods
@@ -68,6 +94,20 @@ namespace RoutingSimulator.UI
             c.LabelColor = new SolidColorBrush(Colors.Black);
             c.Opacity = StationaryOpacity;
         }
+
+        private void ResetAllStyles()
+        {
+            foreach(var line in _lines)
+            {
+                line.Stroke = LineStroke;
+                line.Thickness = LineThickness;
+            }
+            foreach(var circle in _circles)
+            {
+                ResetCircleStyle(circle);
+            }
+        }
+
         private Circle CreateCircle(bool isTransaprent = true)
         {
             var c = new Circle(CircleRadius, fill: CircleFill.Clone(),
@@ -110,6 +150,9 @@ namespace RoutingSimulator.UI
                 {
                     var c = s as Circle;
                     canvas.Children.Remove(c);
+                    graph.RemoveNode(_circleNodeMap[c]);
+                    _circles.Remove(c);
+                    _circleNodeMap.Remove(c);
                     c.Dispose();
                 }
                 else if(_currentMode == Mode.Send)
@@ -120,7 +163,7 @@ namespace RoutingSimulator.UI
                                             Circle.Empty,
                                             new SolidColorBrush(Colors.Red),
                                             new SolidColorBrush(Colors.Red),
-                                            MovingOpacity, SendLineDashLength);
+                                            MovingOpacity, LineThickness, SendLineDashLength);
                     canvas.Children.Add(_tempLine);
                 }
             };
@@ -128,8 +171,16 @@ namespace RoutingSimulator.UI
             {
                 if(_currentMode == Mode.Default)
                 {
+                    var c = s as Circle;
                     Mouse.Capture(null);
-                    (s as Circle).Opacity = StationaryOpacity;
+                    c.Opacity = StationaryOpacity;
+                    if(!_circleNodeMap.ContainsKey(c))
+                    {
+                        var node = new Node<string>(c.Text);
+                        _circleNodeMap.Add(c, node);
+                        _circles.Add(c);
+                        graph.AddNode(node);
+                    }
                 }
                 else if(_currentMode == Mode.Send)
                 {
@@ -139,6 +190,32 @@ namespace RoutingSimulator.UI
                     ResetCircleStyle(_tempLine.Start);
                     ResetCircleStyle(c);
                     // send a packet from _tempLine.Start to _tempLine.End
+                    var startNode = _circleNodeMap[_tempLine.Start];
+                    var endNode = _circleNodeMap[c];
+                    try
+                    {
+                        var path = graph.FindShortestPath(startNode, endNode).ToArray();
+                        var lines = new List<Shapes.Line>();
+                        for(int i = 0; i < path.Length-1; i++)
+                        {
+                            var line = _lineNodeMap.Where(x => (x.Value.Item1 == path[i] && x.Value.Item2 == path[i + 1]) ||
+                                                         (x.Value.Item1 == path[i + 1] && x.Value.Item2 == path[i])
+                                                         )
+                                                   .Select(x => x.Key)
+                                                   .FirstOrDefault();
+                            lines.Add(line);
+                        }
+                        ResetAllStyles();
+                        foreach(var line in lines)
+                        {
+                            line.Stroke = PathLineStroke;
+                            line.Thickness = PathLineThickness;
+                        }
+                    }
+                    catch(PathDoesNotExistException)
+                    {
+                        MessageBox.Show("The selected routers are not connected.", "No connection", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             };
             OnCircleMouseEnter = (s, args) =>
@@ -254,8 +331,9 @@ namespace RoutingSimulator.UI
                     var start = s as Circle;
                     _tempLine = new Shapes.Line(start,
                                                 Circle.Empty,
-                                                new SolidColorBrush(Colors.Black),
-                                                new SolidColorBrush(Colors.Black),
+                                                LineStroke,
+                                                LineStroke,
+                                                LineThickness,
                                                 MovingOpacity);
                     _tempLine.Disposing += (sender, e) =>
                     {
@@ -290,6 +368,14 @@ namespace RoutingSimulator.UI
                         _tempLine.LabelText = e.ToString();
                         _tempLine.End = c;
                         _tempLine.Opacity = StationaryOpacity;
+                        _lines.Add(_tempLine);
+
+                        var startNode = _circleNodeMap[_tempLine.Start];
+                        var endNode = _circleNodeMap[_tempLine.End];
+                        _lineNodeMap.Add(_tempLine,
+                            new Tuple<Node<string>, Node<string>>(startNode, endNode));
+                        graph.AddEdge(startNode, endNode, e);
+
                         _tempLine = null;
                     };
                     window.ShowDialog();

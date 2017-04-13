@@ -129,6 +129,13 @@ namespace RoutingSimulator.UI.Shapes
         private CircleLabel _label;
         private Point _position;
 
+        public string Text
+        {
+            get
+            {
+                return _label.Text;
+            }
+        }
         public Brush Fill
         {
             get
