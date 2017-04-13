@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace RoutingSimulator.Core
 {
@@ -50,11 +51,14 @@ namespace RoutingSimulator.Core
             _neighbours.Add(node);
             _distances.Add(node, distance);
             _neighbourDistanceVectors.Add(node, node.DistanceVector);
-            node.DistanceVectorUpdated += (s, e) =>
-            {
-                _neighbourDistanceVectors[node] = node.DistanceVector;
-                UpdateDistanceVector();
-            };
+            node.DistanceVectorUpdated += UpdateNeighbourDistanceVector;
+            UpdateDistanceVector();
+        }
+
+        private void UpdateNeighbourDistanceVector(object sender, EventArgs e)
+        {
+            var node = sender as Node<T>;
+            _neighbourDistanceVectors[node] = node.DistanceVector;
             UpdateDistanceVector();
         }
 
@@ -62,25 +66,22 @@ namespace RoutingSimulator.Core
         {
             if (!_neighbours.Contains(node))
                 return;
+            node.DistanceVectorUpdated -= UpdateNeighbourDistanceVector;
             _neighbours.Remove(node);
             _distances.Remove(node);
             _neighbourDistanceVectors.Remove(node);
-            var badEntries = _distanceVector.Entries.Where(x => x.Next == node);
-            if(badEntries.Count() != 0)
-            {
-                _distanceVector.RemoveNode(node);
-                UpdateDistanceVector();
-            }
+
+            UpdateDistanceVector();
         }
 
         private void UpdateDistanceVector()
         {
             var distanceVector = new DistanceVector<T>(this);
-            var destinations = _neighbours.SelectMany(
-                                x => x.DistanceVector
-                                      .Entries
-                                      .Select(y => y.Destination)
-                                ).Where(x => x != this).Distinct().ToList();
+            List<Node<T>> destinations = _neighbours.SelectMany(
+                                                    x => x.DistanceVector
+                                                          .Entries
+                                                          .Select(y => y.Destination)
+                                                    ).Where(x => x != this).Distinct().ToList();
             foreach(var destination in destinations)
             {
                 long bestDist = long.MaxValue;
@@ -92,7 +93,7 @@ namespace RoutingSimulator.Core
                                                .Entries
                                                .Where(x => x.Destination == destination)
                                                .Where(x => x.Next != this)
-                                               .Select(x=>x.Distance);
+                                               .Select(x => x.Distance);
                     if (distToDest.Count() == 0)
                         continue;
                     if (distToNeigh + distToDest.First() < bestDist)
@@ -104,50 +105,14 @@ namespace RoutingSimulator.Core
                 if(next != null)
                     distanceVector.AddEntry(destination, bestDist, next);
             }
-            if(!_distanceVector.Equals(distanceVector))
-            {
-                _distanceVector = distanceVector;
-                DistanceVectorUpdated?.Invoke(this, EventArgs.Empty);
-            }
+            _distanceVector = distanceVector;
         }
 
-        public void MergeDistanceVector(Node<T> node, long distance)
+        public void Tick()
         {
-            var mergedVector = new DistanceVector<T>(this);
-            var destinations = DistanceVector.Entries
-                                             .Select(x => x.Destination)
-                                             .Union(node.DistanceVector
-                                                        .Entries
-                                                        .Select(x => x.Destination));
-            bool isBetter = false;
-            foreach(var d in destinations)
-            {
-                var local = DistanceVector.Entries.Where(x => x.Destination == d).FirstOrDefault();
-                var other = node.DistanceVector.Entries.Where(x => x.Destination == d).FirstOrDefault();
-                if(local == null) // add a completely new entry
-                {
-                    isBetter = true;
-                    DistanceVector.AddEntry(d, distance + other.Distance, node);
-                }
-                else if(other == null)
-                {
-                    // nothing to update locally
-                }
-                else
-                {
-                    if(distance + other.Distance < local.Distance)
-                    {
-                        isBetter = true;
-                        DistanceVector.AddEntry(d, distance + other.Distance, node);
-                    }
-                }
-            }
-            if (isBetter)
-            {
-                DistanceVector = mergedVector;
-            }
+            DistanceVectorUpdated?.Invoke(this, EventArgs.Empty);
         }
-
+        
         public int CompareTo(Node<T> other)
         {
             return Value.CompareTo(other.Value);

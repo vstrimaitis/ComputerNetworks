@@ -9,7 +9,6 @@ namespace RoutingSimulator.Core
     public class UndirectedWeightedGraph<TNode> where TNode : IComparable<TNode>, IEquatable<TNode>
     {
         private ISet<Node<TNode>> _nodes;
-        //private IDictionary<Node<TNode>, ISet<Edge<TNode>>> _adjacencyList;
 
         public IEnumerable<Node<TNode>> Nodes
         {
@@ -22,7 +21,6 @@ namespace RoutingSimulator.Core
         public UndirectedWeightedGraph()
         {
             _nodes = new HashSet<Node<TNode>>();
-            //_adjacencyList = new Dictionary<Node<TNode>, ISet<Edge<TNode>>>();
         }
 
         public bool AddNode(Node<TNode> node)
@@ -30,7 +28,6 @@ namespace RoutingSimulator.Core
             if (_nodes.Contains(node))
                 return false;
             _nodes.Add(node);
-            //_adjacencyList.Add(node, new HashSet<Edge<TNode>>());
             return true;
         }
 
@@ -49,78 +46,26 @@ namespace RoutingSimulator.Core
         /// <summary>
         /// Adds a bidirectional edge between node1 and node2
         /// </summary>
-        public void AddEdge(Edge<TNode> edge)
+        public void AddEdge(Node<TNode> node1, Node<TNode> node2, long weight)
         {
-            if (!_nodes.Contains(edge.Node1) || !_nodes.Contains(edge.Node2))
+            if (!_nodes.Contains(node1) || !_nodes.Contains(node2))
                 throw new NodeDoesNotExistException("The specified node does not exist in this graph.");
-            edge.Node1.AddNeighbour(edge.Node2, edge.Weight);
-            edge.Node2.AddNeighbour(edge.Node1, edge.Weight);
+            node1.AddNeighbour(node2, weight);
+            node2.AddNeighbour(node1, weight);
         }
 
-        public void RemoveEdge(Edge<TNode> edge)
+        public void RemoveEdge(Node<TNode> node1, Node<TNode> node2, long weight)
         {
-            if (!_nodes.Contains(edge.Node1) || !_nodes.Contains(edge.Node2))
+            if (!_nodes.Contains(node1) || !_nodes.Contains(node2))
                 return;
-            edge.Node1.RemoveNeighbour(edge.Node2);
-            edge.Node2.RemoveNeighbour(edge.Node1);
+            node1.RemoveNeighbour(node2);
+            node2.RemoveNeighbour(node1);
         }
 
-        private void MergeDistanceVectors(Node<TNode> node1, Node<TNode> node2, long distance)
+        public void Tick()
         {
-            var mergedVector1 = new DistanceVector<TNode>(node1);
-            var mergedVector2 = new DistanceVector<TNode>(node2);
-            var destinations = node1.DistanceVector.Entries
-                                                   .Select(x => x.Destination)
-                                                   .Union(node2.DistanceVector
-                                                           .Entries
-                                                           .Select(x => x.Destination));
-            bool isBetter1 = false, isBetter2 = false;
-            foreach (var d in destinations)
-            {
-                var entry1 = node1.DistanceVector.Entries.Where(x => x.Destination == d).FirstOrDefault();
-                var entry2 = node2.DistanceVector.Entries.Where(x => x.Destination == d).FirstOrDefault();
-                if (entry1 == null)
-                {
-                    isBetter1 = true;
-                    mergedVector1.AddEntry(d, distance + entry2.Distance, node2);
-                    mergedVector2.AddEntry(entry2);
-                }
-                else if (entry2 == null)
-                {
-                    isBetter2 = true;
-                    mergedVector1.AddEntry(entry1);
-                    mergedVector2.AddEntry(d, distance + entry1.Distance, node1);
-                }
-                else
-                {
-                    if (distance + entry2.Distance < entry1.Distance)
-                    {
-                        isBetter1 = true;
-                        mergedVector1.AddEntry(d, distance + entry2.Distance, node2);
-                    }
-                    else
-                    {
-                        mergedVector1.AddEntry(entry1);
-                    }
-                    if(distance + entry1.Distance < entry2.Distance)
-                    {
-                        isBetter2 = true;
-                        mergedVector2.AddEntry(d, distance + entry1.Distance, node1);
-                    }
-                    else
-                    {
-                        mergedVector2.AddEntry(entry2);
-                    }
-                }
-            }
-            if (isBetter1)
-            {
-                node1.DistanceVector = mergedVector1;
-            }
-            if(isBetter2)
-            {
-                node2.DistanceVector = mergedVector2;
-            }
+            foreach (var node in _nodes)
+                node.Tick();
         }
 
         public IEnumerable<Node<TNode>> FindShortestPath(Node<TNode> from, Node<TNode> to)

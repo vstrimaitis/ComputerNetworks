@@ -5,9 +5,10 @@ using System.Text;
 
 namespace RoutingSimulator.Core
 {
-    public class DistanceVector<TNode> : IEquatable<DistanceVector<TNode>>
+    public class DistanceVector<TNode>
                            where TNode : IComparable<TNode>, IEquatable<TNode>
     {
+        private const int InfiniteWeight = 10000;
         private ISet<DistanceVectorEntry<TNode>> _entries;
         public Node<TNode> Source { get; private set; }
         public IEnumerable<DistanceVectorEntry<TNode>> Entries
@@ -35,30 +36,14 @@ namespace RoutingSimulator.Core
             var e = _entries.Where(x => x.Destination == entry.Destination).FirstOrDefault();
             if (e != null)
                 _entries.Remove(e);
+            if (entry.Distance > InfiniteWeight)
+                return;
             _entries.Add(entry);
         }
 
         public void RemoveNode(Node<TNode> dst)
         {
             _entries.RemoveWhere(x => x.Destination == dst || x.Next == dst);
-        }
-
-        public bool Equals(DistanceVector<TNode> other)
-        {
-            var entries = other.Entries.ToList();
-            if (_entries.Count != entries.Count)
-                return false;
-            foreach(var entry in _entries)
-            {
-                var row = entries.Where(x => x.Destination == entry.Destination).FirstOrDefault();
-                if (row == null)
-                    return false;
-                if (row.Distance != entry.Distance)
-                    return false;
-                if (row.Next != entry.Next)
-                    return false;
-            }
-            return true;
         }
     }
 
