@@ -54,7 +54,7 @@ namespace RoutingSimulator.Core
             node2.AddNeighbour(node1, weight);
         }
 
-        public void RemoveEdge(Node<TNode> node1, Node<TNode> node2, long weight)
+        public void RemoveEdge(Node<TNode> node1, Node<TNode> node2)
         {
             if (!_nodes.Contains(node1) || !_nodes.Contains(node2))
                 return;
